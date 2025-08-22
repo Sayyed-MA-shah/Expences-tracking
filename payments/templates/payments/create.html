@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}New Payment - WINSIDE{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-md">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">💳 Add New Payment</h1>
+    
+    <form method="post" class="space-y-5">
+        {% csrf_token %}
+        
+        <!-- Django form rendered with better styling -->
+        <div class="space-y-4">
+            {{ form.non_field_errors }}
+            {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ field.label }}
+                    </label>
+                    <div class="w-full">
+                        {{ field }}
+                    </div>
+                    {% if field.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ field.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" 
+                class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition">
+                💾 Save Payment
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

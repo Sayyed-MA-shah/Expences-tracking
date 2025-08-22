@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <h2 class="text-xl font-semibold mb-4">🛠 Record Daily Work for {{ employee.name }}</h2>
+
+    <!-- Date -->
+    <div>
+      <label class="block font-medium mb-1">Date</label>
+      <input type="date" name="date" value="{{ today|default:'' }}"
+             class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+    </div>
+
+    <!-- Item Detail -->
+    <div>
+      <label class="block font-medium mb-1">Item Detail</label>
+      <input type="text" name="description" placeholder="E.g. Window Frame, Door Panel..."
+             class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+    </div>
+
+    <!-- Quantity -->
+    <div>
+      <label class="block font-medium mb-1">Quantity Produced</label>
+      <input type="number" name="quantity" placeholder="Enter number of items produced"
+             class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
+    </div>
+
+    <!-- Item Price -->
+    <div>
+      <label class="block font-medium mb-1">Item Price (£)</label>
+      <input type="number" step="0.01" name="item_price" placeholder="Enter price per item"
+             class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit"
+            class="w-full py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+      ➕ Add Work Record
+    </button>
+  </form>
+</div>
+{% endblock %}

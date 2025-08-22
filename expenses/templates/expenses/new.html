@@ -1,0 +1,68 @@
+
+{% extends 'base.html' %}
+{% block title %}Daily Expenses · New - WINSIDE{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">🧾 Add Daily Expense</h1>
+    <p class="text-gray-500 text-sm mt-1">Material, Rent/Bill/Guest, or Setup purchase</p>
+  </div>
+
+  <form method="post" class="space-y-5">
+    {% csrf_token %}
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+      {{ form.date }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+      {{ form.category }}
+    </div>
+
+    <div id="subtype-wrapper" class="{% if form.initial.category != 'RBG' %}hidden{% endif %}">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Rent / Bill / Guest</label>
+      {{ form.sub_type }}
+      <p class="text-xs text-gray-400 mt-1">Only required when category is Rent/Bill/Guest</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+      {{ form.description }}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+      {{ form.amount }}
+    </div>
+
+    <div class="flex justify-between pt-4">
+      <a href="{% url 'expenses:list' %}" class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">Cancel</a>
+      <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow">Save Expense</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Show/hide sub_type based on category
+  (function () {
+    const cat = document.getElementById("id_category");
+    const wrap = document.getElementById("subtype-wrapper");
+    function sync() {
+      if (!cat) return;
+      if (cat.value === "RBG") {
+        wrap.classList.remove("hidden");
+      } else {
+        wrap.classList.add("hidden");
+        const sub = document.getElementById("id_sub_type");
+        if (sub) sub.value = "";
+      }
+    }
+    if (cat && wrap) {
+      cat.addEventListener("change", sync);
+      sync();
+    }
+  })();
+</script>
+{% endblock %}

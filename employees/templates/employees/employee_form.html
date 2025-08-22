@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" class="bg-white p-6 rounded-xl shadow space-y-4 max-w-md mx-auto">
+  {% csrf_token %}
+
+  <h2 class="text-xl font-semibold mb-4">
+    {% if employee %} ✏️ Edit Employee {% else %} ➕ Add New Employee {% endif %}
+  </h2>
+
+  <div>
+    <label class="block font-medium mb-1">Full Name</label>
+    <input type="text" name="name" value="{{ form.name.value|default_if_none:'' }}"
+           placeholder="Enter employee name"
+           class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
+  </div>
+
+  <div>
+    <label class="block font-medium mb-1">Phone</label>
+    <input type="text" name="phone" value="{{ form.phone.value|default_if_none:'' }}"
+           placeholder="e.g. +44 7700 900123"
+           class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+  </div>
+
+  <div>
+    <label class="block font-medium mb-1">Job Role</label>
+    <input type="text" name="role" value="{{ form.role.value|default_if_none:'' }}"
+           placeholder="Welder, Carpenter, Assistant..."
+           class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+  </div>
+
+  <button type="submit"
+          class="w-full py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+    💾 {% if employee %} Update Employee {% else %} Save Employee {% endif %}
+  </button>
+</form>
+{% endblock %}

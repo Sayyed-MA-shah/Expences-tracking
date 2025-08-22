@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- <div class="max-w-lg mx-auto bg-white shadow rounded-xl p-6">
+  <h2 class="text-xl font-bold mb-4">{{ title }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Save</button>
+  </form>
+</div> -->
+<h1 class="text-xl font-bold mb-4">New Contractual Employee</h1>
+
+<form method="post" class="bg-white p-6 rounded-xl shadow space-y-4">
+  {% csrf_token %}
+  <div>
+    <label class="block font-medium">Name</label>
+    <input type="text" name="name" class="w-full border rounded-lg p-2" required>
+  </div>
+  <div>
+    <label class="block font-medium">Phone</label>
+    <input type="text" name="phone" class="w-full border rounded-lg p-2">
+  </div>
+  <div>
+    <label class="block font-medium">Job Role</label>
+    <input type="text" name="role" class="w-full border rounded-lg p-2">
+  </div>
+  <div>
+    <label class="block font-medium">Item Price (£)</label>
+    <input type="number" name="item_price" step="0.01" class="w-full border rounded-lg p-2" required>
+  </div>
+  <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Save</button>
+</form>
+{% endblock %}
+
+
+

@@ -1,0 +1,48 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-xl font-bold mb-4">Employees</h1>
+
+<a href="{% url 'employees:fixed_new' %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg mb-4 inline-block">+ Add Employee</a>
+
+<table class="w-full border-collapse bg-white shadow rounded-xl">
+  <thead class="bg-gray-100">
+    <tr>
+      <th class="p-2">Name</th>
+      <th class="p-2">Phone</th>
+      <th class="p-2">Role</th>
+      <th class="p-2">Item Price</th>
+      <th class="p-2">Total Earned</th>
+      <th class="p-2">Total Paid</th>
+      <th class="p-2">Balance</th>
+      <th class="p-2">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for emp in employees %}
+    <tr class="border-b">
+      <td class="p-2">{{ emp.name }}</td>
+      <td class="p-2">{{ emp.phone }}</td>
+      <td class="p-2">{{ emp.role }}</td>
+      <td class="p-2">£{{ emp.item_price }}</td>
+      <td class="p-2">£{{ emp.total_earned }}</td>
+      <td class="p-2">£{{ emp.total_paid }}</td>
+      <td class="p-2 font-bold {% if emp.balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">
+        £{{ emp.balance }}
+      </td>
+      <td class="p-2 space-x-2">
+        <a href="{% url 'employees:add_work' emp.id %}" class="px-2 py-1 bg-indigo-500 text-white rounded">+ Work</a>
+        <a href="{% url 'employees:add_advance' emp.id %}" class="px-2 py-1 bg-yellow-500 text-white rounded">+ Advance</a>
+        
+
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="8" class="text-center py-4">No employees yet.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

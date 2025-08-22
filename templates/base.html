@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}WINSIDE{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+  {% if not request.resolver_match.url_name == "login" %}
+<nav class="bg-white border-b">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="{% url 'dashboard:home' %}" class="font-bold">WINSIDE</a>
+    <div class="space-x-4">
+      <a class="px-5 py-2 rounded-lg bg-gray-800 text-white font-medium shadow-md
+          transition-all duration-300 ease-in-out
+          hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5" href="{% url 'payments:list' %}">💳 Payments</a>
+
+
+      <a class="px-5 py-2 rounded-lg bg-gray-800 text-white font-medium shadow-md
+          transition-all duration-300 ease-in-out
+          hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5" href="{% url 'expenses:list' %}">🧾 Expenses</a>
+
+      <a href="{% url 'employees:list' %}" 
+          class="px-5 py-2 rounded-lg bg-gray-800 text-white font-medium shadow-md
+          transition-all duration-300 ease-in-out
+          hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5">
+            👨‍🔧 Employees
+      </a>
+
+
+      {% if user.is_authenticated %}
+  <form action="{% url 'accounts:logout' %}" method="post" class="inline">
+    {% csrf_token %}
+    <button type="submit" class="px-4 py-2 bg-red-400 text-white rounded hover:bg-red-700">
+      🚪 Logout
+    </button>
+  </form>
+{% else %}
+  <a href="{% url 'accounts:login' %}" class="px-4 py-2 bg-blue-600 text-white rounded">Login</a>
+{% endif %}
+
+      
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<main class="max-w-6xl mx-auto px-4 py-6">
+  
+  <!-- ✅ Messages block -->
+  {% if messages %}
+    <div class="max-w-2xl mx-auto mb-4 space-y-2">
+      {% for message in messages %}
+        <div class="
+          px-4 py-2 rounded-lg text-white shadow
+          {% if message.tags == 'success' %} bg-green-600 
+          {% elif message.tags == 'error' %} bg-red-600 
+          {% else %} bg-gray-600 {% endif %}
+        ">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <!-- ✅ End messages block -->
+
+  {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

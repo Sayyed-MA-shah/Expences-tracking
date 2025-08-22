@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Payments - WINSIDE{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between">
+  <h1 class="text-xl font-semibold">Payment Detail</h1>
+  <a href="{% url 'payments:create' %}" class="px-3 py-2 rounded bg-blue-600 text-white">Add</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+  <div class="bg-white p-4 rounded-xl shadow">Total Pay-in: <strong>£{{ total_payin|default:0 }}</strong></div>
+  <div class="bg-white p-4 rounded-xl shadow">Total Expenses (Pay-out): <strong>£{{ total_payout|default:0 }}</strong></div>
+  <div class="bg-white p-4 rounded-xl shadow">Balance: <strong>£{{ balance|default:0 }}</strong></div>
+</div>
+<div class="bg-white rounded-xl shadow overflow-hidden">
+  <table class="min-w-full divide-y">
+    <thead class="bg-gray-100"><tr>
+      <th class="px-4 py-2 text-left">Date</th>
+      <th class="px-4 py-2 text-left">Description</th>
+      <th class="px-4 py-2 text-left">Type</th>
+      <th class="px-4 py-2 text-right">Amount</th>
+    </tr></thead>
+    <tbody class="divide-y">
+    {% for i in items %}
+      <tr class="bg-white">
+        <td class="px-4 py-2">{{ i.date }}</td>
+        <td class="px-4 py-2">{{ i.description }}</td>
+        <td class="px-4 py-2">{{ i.get_type_display }}</td>
+        <td class="px-4 py-2 text-right">£{{ i.amount }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">No records yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

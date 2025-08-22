@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Employee Detail - {{ employee.name }}{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Employee: {{ employee.name }}</h1>
+<!-- Add this under the page heading (near the top) -->
+<div class="mb-6 flex gap-3">
+  <a href="{% url 'employees:add_work' employee.id %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">+ Add Work</a>
+  <a href="{% url 'employees:add_salary' employee.id %}" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">+ Add Salary</a>
+  <a href="{% url 'employees:payslip' employee.id %}" class="px-4 py-2 bg-gray-700 text-white rounded-lg shadow hover:bg-gray-800">🧾 Payslip</a>
+</div>
+
+<!-- ====== Employee Summary ====== -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm">Total Earned</h4>
+    <p class="text-2xl font-bold text-green-600 mt-2">£{{ employee.total_earned }}</p>
+  </div>
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm">Salary Paid</h4>
+    <p class="text-2xl font-bold text-blue-600 mt-2">£{{ employee.total_salary_paid }}</p>
+  </div>
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm">Advance</h4>
+    <p class="text-2xl font-bold text-yellow-600 mt-2">£{{ employee.total_advances }}</p>
+  </div>
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm">Balance</h4>
+    <p class="text-2xl font-bold {% if employee.balance < 0 %}text-red-600{% else %}text-green-600{% endif %} mt-2">
+      £{{ employee.balance }}
+    </p>
+  </div>
+</div>
+
+<!-- ====== Work Records ====== -->
+<div class="bg-white shadow rounded-xl mb-8">
+  <div class="border-b px-6 py-3">
+    <h2 class="text-lg font-semibold">Work Records</h2>
+  </div>
+  <ul class="divide-y">
+    {% for w in work_records %}
+      <li class="p-4 flex justify-between text-sm">
+        <span>{{ w.date }} — {{ w.quantity }} items</span>
+        <span class="font-medium">£{{ w.total_price }}</span>
+      </li>
+    {% empty %}
+      <li class="p-4 text-gray-500">No work records found.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- ====== Salary Payments ====== -->
+<div class="bg-white shadow rounded-xl mb-8">
+  <div class="border-b px-6 py-3">
+    <h2 class="text-lg font-semibold">Salary Payments</h2>
+  </div>
+  <ul class="divide-y">
+    {% for sp in salary_payments %}
+      <li class="p-4 flex justify-between text-sm">
+        <span>{{ sp.date }}</span>
+        <span class="font-medium text-blue-600">£{{ sp.amount }}</span>
+      </li>
+    {% empty %}
+      <li class="p-4 text-gray-500">No salary payments found.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- ====== Advance Payments ====== -->
+<div class="bg-white shadow rounded-xl mb-8">
+  <div class="border-b px-6 py-3">
+    <h2 class="text-lg font-semibold">Advance Payments</h2>
+  </div>
+  <ul class="divide-y">
+    {% for adv in advances %}
+      <li class="p-4 flex justify-between text-sm">
+        <span>{{ adv.date }} — <span class="italic">{{ adv.note }}</span></span>
+        <span class="font-medium text-yellow-600">£{{ adv.amount }}</span>
+      </li>
+    {% empty %}
+      <li class="p-4 text-gray-500">No advances found.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- ====== Back Button ====== -->
+<div class="mt-6">
+  <a href="{% url 'employees:list' %}" class="px-5 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-700">
+    ← Back to Employees
+  </a>
+  <a href="{% url 'employees:report' employee.id %}" 
+   class="px-5 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">
+   📄 Generate Report
+</a>
+
+
+</div>
+
+{% endblock %}

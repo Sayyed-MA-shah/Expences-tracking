@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="w-full max-w-md bg-white p-8 rounded-xl shadow">
+    <h2 class="text-2xl font-bold mb-6 text-center">🔑 Login</h2>
+
+    {% if form.errors %}
+      <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+        Invalid username or password. Please try again.
+      </div>
+    {% endif %}
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      
+      <div>
+        <label class="block font-medium mb-1">Username</label>
+        <input type="text" name="username"
+               class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
+               required autofocus>
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">Password</label>
+        <input type="password" name="password"
+               class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
+               required>
+      </div>
+
+      <button type="submit"
+              class="w-full py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+        🔓 Login
+      </button>
+    </form>
+
+    <p class="mt-4 text-center text-gray-500 text-sm">
+      Don’t have an account? <a href="/admin/" class="text-blue-600 hover:underline">Ask admin</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

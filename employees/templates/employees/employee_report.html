@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Employee Report - {{ employee.name }}{% endblock %}
+
+{% block content %}
+<!-- <div class="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow">
+  <div class="mb-6 flex gap-3">
+  <a href="{% url 'employees:add_work' employee.id %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">+ Add Work</a>
+  <a href="{% url 'employees:add_salary' employee.id %}" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">+ Add Salary</a>
+  <a href="{% url 'employees:payslip' employee.id %}" class="px-4 py-2 bg-gray-700 text-white rounded-lg shadow hover:bg-gray-800">🧾 Payslip</a>
+</div> -->
+  <h2 class="text-2xl font-bold mb-4">📄 {{ employee.name }} Report</h2>
+  <p class="text-gray-500 mb-4">{{ employee.name }} ({{ start_date }} → {{ end_date }})</p>
+
+  <!-- Filters -->
+  <form method="get" class="flex gap-4 mb-6 no-print">
+    <input type="date" name="start_date" value="{{ start_date }}" class="border p-2 rounded">
+    <input type="date" name="end_date" value="{{ end_date }}" class="border p-2 rounded">
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Apply</button>
+    <hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr>
+    <a href="{% url 'employees:add_work' employee.id %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">+ Add Work</a>
+  <a href="{% url 'employees:add_salary' employee.id %}" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">+ Add Salary</a>
+  <button type="button" onclick="window.print()" 
+            class="px-4 py-2 bg-green-600 text-white rounded">🖨 Print</button>
+  <a href="{% url 'employees:payslip' employee.id %}" class="px-4 py-2 bg-gray-700 text-white rounded-lg shadow hover:bg-gray-800">🧾 Payslip</a>
+  </form>
+
+  <!-- Summary -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <div class="p-4 bg-green-50 rounded-lg text-center">
+      <p class="text-sm text-gray-500">Total Earned</p>
+      <p class="text-xl font-bold text-green-700">£{{ total_work }}</p>
+    </div>
+    <div class="p-4 bg-blue-50 rounded-lg text-center">
+      <p class="text-sm text-gray-500">Salary Paid</p>
+      <p class="text-xl font-bold text-blue-700">£{{ total_salary }}</p>
+    </div>
+    <div class="p-4 bg-yellow-50 rounded-lg text-center">
+      <p class="text-sm text-gray-500">Advance Paid</p>
+      <p class="text-xl font-bold text-yellow-700">£{{ total_advances }}</p>
+    </div>
+    <div class="p-4 {% if balance < 0 %}bg-red-50{% else %}bg-green-100{% endif %} rounded-lg text-center">
+      <p class="text-sm text-gray-500">Balance</p>
+      <p class="text-xl font-bold {% if balance < 0 %}text-red-700{% else %}text-green-700{% endif %}">
+        £{{ balance }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Work Records -->
+  <h3 class="text-lg font-semibold mb-2">🛠 Work Records</h3>
+  <table class="w-full border mb-6">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="p-2 text-left">Date</th>
+        <th class="p-2">Description</th>
+        <th class="p-2">Quantity</th>
+        <th class="p-2">Price</th>
+        <th class="p-2">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for wr in work_records %}
+      <tr class="border-t">
+        <td class="p-2">{{ wr.date }}</td>
+        <td class="p-2">{{ wr.description }}</td>
+        <td class="p-2 text-center">{{ wr.quantity }}</td>
+        <td class="p-2 text-right">£{{ wr.item_price }}</td>
+        <td class="p-2 text-right">£{{ wr.quantity|floatformat:0|add:0|default_if_none:0|floatformat:2 }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="p-2 text-center text-gray-400">No records</td></tr>
+      {% endfor %}
+      <tr class="bg-gray-50 font-bold">
+        <td colspan="4" class="p-2 text-right">Total</td>
+        <td class="p-2 text-right">£{{ total_work }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Salary Payments -->
+  <h3 class="text-lg font-semibold mb-2">💷 Salary Payments</h3>
+  <table class="w-full border mb-6">
+    <thead class="bg-gray-100">
+      <tr><th class="p-2">Date</th><th class="p-2">Amount</th></tr>
+    </thead>
+    <tbody>
+      {% for sp in salary_payments %}
+      <tr class="border-t">
+        <td class="p-2">{{ sp.date }}</td>
+        <td class="p-2 text-right">£{{ sp.amount }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="2" class="p-2 text-center text-gray-400">No salary payments</td></tr>
+      {% endfor %}
+      <tr class="bg-gray-50 font-bold">
+        <td class="p-2 text-right">Total</td>
+        <td class="p-2 text-right">£{{ total_salary }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Advance Payments -->
+  <h3 class="text-lg font-semibold mb-2">💰 Advance Payments</h3>
+  <table class="w-full border mb-6">
+    <thead class="bg-gray-100">
+      <tr><th class="p-2">Date</th><th class="p-2">Amount</th></tr>
+    </thead>
+    <tbody>
+      {% for adv in advance_payments %}
+      <tr class="border-t">
+        <td class="p-2">{{ adv.date }}</td>
+        <td class="p-2 text-right">£{{ adv.amount }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="2" class="p-2 text-center text-gray-400">No advances</td></tr>
+      {% endfor %}
+      <tr class="bg-gray-50 font-bold">
+        <td class="p-2 text-right">Total</td>
+        <td class="p-2 text-right">£{{ total_advances }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    nav, footer { display: none !important; }
+    body { background: white !important; }
+  }
+</style>
+{% endblock %}

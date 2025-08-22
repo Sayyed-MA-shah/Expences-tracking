@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow">
+  <h2 class="text-xl font-semibold mb-4 text-red-600">⚠️ Delete Employee</h2>
+  <p>Are you sure you want to delete <strong>{{ employee.name }}</strong>?</p>
+
+  <form method="post" class="mt-4 space-x-2">
+    {% csrf_token %}
+    <button type="submit"
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+      Yes, Delete
+    </button>
+    <a href="{% url 'employees:list' %}" 
+       class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">
+      Cancel
+    </a>
+  </form>
+</div>
+{% endblock %}

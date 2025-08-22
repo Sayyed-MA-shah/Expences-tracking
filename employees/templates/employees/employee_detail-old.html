@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <h2 class="text-2xl font-semibold mb-4">👤 {{ employee.name }}</h2>
+
+  <div class="bg-white rounded-xl shadow p-4 mb-6">
+    <p><strong>Phone:</strong> {{ employee.phone }}</p>
+    <p><strong>Role:</strong> {{ employee.role }}</p>
+    <p><strong>Item Price:</strong> £{{ employee.item_price }}</p>
+    <p><strong>Total Earned:</strong> £{{ employee.total_earned }}</p>
+    <p><strong>Total Paid:</strong> £{{ employee.total_paid }}</p>
+    <a href="{% url 'employees:payslip' employee.id %}" 
+   class="inline-block px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+   🧾 Generate Payslip
+</a>
+
+    <p><strong>Balance:</strong> 
+      <span class="{% if employee.balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">
+        £{{ employee.balance }}
+      </span>
+    </p>
+  </div>
+
+  <!-- Work Records -->
+  <div class="bg-white rounded-xl shadow p-4 mb-6">
+    <h3 class="text-lg font-semibold mb-2">🛠 Work Records</h3>
+    <table class="w-full text-sm border-collapse">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="p-2 text-left">Date</th>
+          <th class="p-2 text-left">Item</th>
+          <th class="p-2 text-left">Quantity</th>
+          <th class="p-2 text-left">Unit Price</th>
+          <th class="p-2 text-left">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for work in works %}
+        <tr class="border-t">
+          <td class="p-2">{{ work.date|date:"Y-m-d" }}</td>
+          <td class="p-2">{{ work.item_name }}</td>
+          <td class="p-2">{{ work.quantity }}</td>
+          <td class="p-2">£{{ work.unit_price }}</td>
+          <td class="p-2">£{{ work.total }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="p-4 text-center text-gray-500">No work records found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Advance Payments -->
+  <div class="bg-white rounded-xl shadow p-4">
+    <h3 class="text-lg font-semibold mb-2">💰 Advance Payments</h3>
+    <table class="w-full text-sm border-collapse">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="p-2 text-left">Date</th>
+          <th class="p-2 text-left">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for adv in advances %}
+        <tr class="border-t">
+          <td class="p-2">{{ adv.date|date:"Y-m-d" }}</td>
+          <td class="p-2">£{{ adv.amount }}</td>
+        </tr>
+        
+        {% empty %}
+        <tr>
+          <td colspan="2" class="p-4 text-center text-gray-500">No advances found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

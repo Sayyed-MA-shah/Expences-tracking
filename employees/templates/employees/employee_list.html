@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-semibold">Employees</h2>
+    <a href="{% url 'employees:create' %}" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+      + Add Employee
+    </a>
+  </div>
+  <div class="mb-4">
+  <form method="get" action="" class="flex space-x-2">
+    <input type="text" name="q" value="{{ query|default:'' }}"
+           placeholder="Search by name or phone"
+           class="flex-1 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+    <button type="submit"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+      🔍 Search
+    </button>
+    {% if query %}
+    <a href="{% url 'employees:list' %}" 
+       class="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400">
+       ❌ Clear
+    </a>
+    {% endif %}
+    
+  </form>
+</div>
+
+
+  <div class="overflow-x-auto bg-white rounded-xl shadow">
+    <table class="w-full border-collapse">
+      <thead class="bg-gray-100 text-sm text-gray-600">
+        <tr>
+          <th class="p-2 text-left">Name</th>
+          <th class="p-2 text-left">Phone</th>
+          <th class="p-2 text-left">Role</th>
+          
+          <th class="p-2 text-left">Total Earned</th>
+          <th class="p-2 text-left">Paid (Advances)</th>
+          <th class="p-2 text-left">Balance</th>
+          <th class="p-2">Actions</th>
+          
+
+        </tr>
+      </thead>
+      <tbody class="divide-y">
+        {% for emp in employees %}
+        <tr class="hover:bg-gray-50">
+          <td class="p-2">
+            <a href="{% url 'employees:detail' emp.id %}" class="text-blue-600 hover:underline">
+              {{ emp.name }}
+            </a>
+          </td>
+          <td class="p-2">{{ emp.phone }}</td>
+          <td class="p-2">{{ emp.role }}</td>
+         
+          <td class="p-2">£{{ emp.total_earned }}</td>
+          <td class="p-2">£{{ emp.total_advances }}</td>
+          <td class="p-2 font-semibold {% if emp.balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">
+            £{{ emp.balance }}
+          </td>
+          <td class="p-2 space-x-2">
+            <!-- <a href="{% url 'employees:add_work' emp.id %}" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm">+ Work</a>
+            
+            <a href="{% url 'employees:add_salary' emp.id %}" class="px-2 py-1 bg-green-600 text-white rounded">+ Salary</a> -->
+
+            <a href="{% url 'employees:update' emp.id %}" class="px-3 py-1 bg-gray-600 text-white rounded-lg text-sm">✏ Edit</a>
+
+             <a href="{% url 'employees:delete' emp.id %}" class="px-3 py-1 bg-red-400 text-white rounded-lg text-sm">🗑 Delete</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="p-4 text-center text-gray-500">No employees found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+<!-- <th class="p-2 text-left">Item Price (£)</th>
+ <td class="p-2">£{{ emp.item_price }}</td> -->
