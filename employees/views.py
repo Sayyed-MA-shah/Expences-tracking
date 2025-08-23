@@ -152,6 +152,11 @@ def employee_report(request, pk):
     salary_payments = employee.salary_payments.filter(date__range=[start_date, end_date])
     advance_payments = employee.advance_payments.filter(date__range=[start_date, end_date])
 
+    total_work = work_records.aggregate(
+    total=Sum(
+        ExpressionWrapper(F("quantity") * F("item_price"), output_field=DecimalField())
+    )
+    )["total"] or 0
     # Totals
     total_work = sum([wr.quantity * wr.item_price for wr in work_records])
     total_salary = sum([sp.amount for sp in salary_payments])

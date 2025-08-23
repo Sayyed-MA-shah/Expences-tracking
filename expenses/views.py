@@ -180,39 +180,46 @@ def expense_bulk_add(request):
 def expense_report(request):
     expenses = []
     total_material = total_rbg = total_setup = total_all = 0
+    start_date = end_date = selected_category = None
 
     if request.method == "POST":
         start_date = request.POST.get("start_date")
         end_date = request.POST.get("end_date")
+        selected_category = request.POST.get("category")
 
         if start_date and end_date:
             expenses = Expense.objects.filter(date__range=[start_date, end_date])
 
-            total_material = expenses.filter(category="MATERIAL").aggregate(total=Sum("amount"))["total"] or 0
-            total_rbg = expenses.filter(category="RBG").aggregate(total=Sum("amount"))["total"] or 0
-            total_setup = expenses.filter(category="SETUP").aggregate(total=Sum("amount"))["total"] or 0
-            total_all = expenses.aggregate(total=Sum("amount"))["total"] or 0
+            if selected_category:  # filter by category if chosen
+                expenses = expenses.filter(category=selected_category)
 
-            # Generate PDF
-            template_path = "expenses/report_pdf.html"
-            context = {
-                "expenses": expenses,
-                "total_material": total_material,
-                "total_rbg": total_rbg,
-                "total_setup": total_setup,
-                "total_all": total_all,
-                "start_date": start_date,
-                "end_date": end_date,
-            }
-            template = get_template(template_path)
-            html = template.render(context)
+        # Totals
+        total_material = Expense.objects.filter(date__range=[start_date, end_date], category="MATERIAL").aggregate(total=Sum("amount"))["total"] or 0
+        total_rbg = Expense.objects.filter(date__range=[start_date, end_date], category="RBG").aggregate(total=Sum("amount"))["total"] or 0
+        total_setup = Expense.objects.filter(date__range=[start_date, end_date], category="SETUP").aggregate(total=Sum("amount"))["total"] or 0
+        total_all = Expense.objects.filter(date__range=[start_date, end_date]).aggregate(total=Sum("amount"))["total"] or 0
 
-            response = HttpResponse(content_type="application/pdf")
-            response["Content-Disposition"] = 'attachment; filename="expenses_report.pdf"'
-            pisa.CreatePDF(html, dest=response)
-            return response
+        # ✅ Generate PDF
+        template_path = "expenses/report_pdf.html"
+        context = {
+            "expenses": expenses,
+            "total_material": total_material,
+            "total_rbg": total_rbg,
+            "total_setup": total_setup,
+            "total_all": total_all,
+            "start_date": start_date,
+            "end_date": end_date,
+            "selected_category": selected_category,
+        }
+        template = get_template(template_path)
+        html = template.render(context)
 
-    return render(request, "expenses/report_form.html")
+        response = HttpResponse(content_type="application/pdf")
+        response["Content-Disposition"] = 'attachment; filename="expenses_report.pdf"'
+        pisa.CreatePDF(html, dest=response)
+        return response
+
+    return render(request, "expenses/report_form.html", {"selected_category": selected_category})
 # /////////////////////////////end Generate reprot////////////////
 
 

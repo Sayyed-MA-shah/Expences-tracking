@@ -5,16 +5,24 @@
   <title>Expense Report</title>
   <style>
     body { font-family: Arial, sans-serif; font-size: 12px; }
-    h1, h2 { text-align: center; }
+    h1, h2, h3 { text-align: center; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #333; padding: 8px; text-align: left; }
     th { background: #f2f2f2; }
     .totals { margin-top: 20px; }
+    .totals p { margin: 4px 0; }
   </style>
 </head>
 <body>
   <h1>Expense Report</h1>
   <h3>{{ start_date }} → {{ end_date }}</h3>
+  <h4>
+    {% if selected_category %}
+      Category: {{ selected_category }}
+    {% else %}
+      All Categories
+    {% endif %}
+  </h4>
 
   <table>
     <thead>
@@ -43,10 +51,15 @@
 
   <div class="totals">
     <h2>Summary</h2>
-    <p>Material: £{{ total_material }}</p>
-    <p>Rent/Bill/Guest: £{{ total_rbg }}</p>
-    <p>Setup Purchase: £{{ total_setup }}</p>
-    <p><strong>Total: £{{ total_all }}</strong></p>
+
+    {% if selected_category %}
+      <p>{{ selected_category }}: £{{ total_all }}</p>
+    {% else %}
+      <p>Material: £{{ total_material }}</p>
+      <p>Rent / Bill / Guest: £{{ total_rbg }}</p>
+      <p>Setup Purchase: £{{ total_setup }}</p>
+      <p><strong>Total: £{{ total_all }}</strong></p>
+    {% endif %}
   </div>
 </body>
 </html>

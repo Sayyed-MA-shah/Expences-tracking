@@ -1,24 +1,38 @@
 {% extends "base.html" %}
-{% block title %}Generate Expense Report{% endblock %}
+{% block title %}Expense Report{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">Generate Expense Report</h1>
+<div class="max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
+  <h2 class="text-xl font-bold mb-4">📄 Generate Expense Report</h2>
 
-<form method="post" class="space-y-4">
-  {% csrf_token %}
-  <div class="flex gap-4">
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+
+    <!-- Date Range -->
     <div>
-      <label class="block text-gray-600 text-sm">Start Date</label>
-      <input type="date" name="start_date" required class="border rounded-lg p-2">
+      <label class="block font-medium mb-1">From Date</label>
+      <input type="date" name="start_date" class="w-full border rounded p-2" required>
     </div>
     <div>
-      <label class="block text-gray-600 text-sm">End Date</label>
-      <input type="date" name="end_date" required class="border rounded-lg p-2">
+      <label class="block font-medium mb-1">To Date</label>
+      <input type="date" name="end_date" class="w-full border rounded p-2" required>
     </div>
-  </div>
-  <button type="submit" 
-          class="px-6 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">
-    📄 Generate PDF
-  </button>
-</form>
+
+    <!-- Category Dropdown -->
+    <div>
+      <label class="block font-medium mb-1">Category</label>
+      <select name="category" class="w-full border rounded p-2">
+        <option value="">All Categories</option>
+        <option value="SETUP" {% if selected_category == "SETUP" %}selected{% endif %}>Setup Purchase</option>
+        <option value="RBG" {% if selected_category == "RBG" %}selected{% endif %}>Rent/Bill/Guest</option>
+        <option value="MATERIAL" {% if selected_category == "MATERIAL" %}selected{% endif %}>Material Expenses</option>
+      </select>
+    </div>
+
+    <button type="submit"
+            class="w-full py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+      📑 Generate Report
+    </button>
+  </form>
+</div>
 {% endblock %}

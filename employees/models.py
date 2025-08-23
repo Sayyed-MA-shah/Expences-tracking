@@ -29,6 +29,8 @@ class ContractualEmployee(models.Model):
     @property
     def balance_abs(self):
         return abs(self.balance)
+
+    
  
 
 
@@ -46,12 +48,17 @@ class WorkRecord(models.Model):
     item_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # ✅ safe default
     description = models.TextField(blank=True, null=True)  # ✅ optional
 
+    
     def total_price(self):
         return self.quantity * self.item_price
 
     def __str__(self):
         return f"{self.employee.name} - {self.date} ({self.quantity} items)"
 
+    @property
+    def total(self):
+        return self.quantity * self.item_price
+    
 
 class SalaryPayment(models.Model):
     employee = models.ForeignKey(
@@ -81,7 +88,7 @@ class SalaryPayment(models.Model):
     def __str__(self):
         return f"Salary {self.amount} to {self.employee.name} on {self.date}"
 
-
+    
 # ---------------------- OTHER MODELS ----------------------
 
 class FixedEmployee(models.Model):

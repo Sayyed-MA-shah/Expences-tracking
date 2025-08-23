@@ -72,7 +72,7 @@
       {% endfor %}
       <tr class="bg-gray-50 font-bold">
         <td colspan="4" class="p-2 text-right">Total</td>
-        <td class="p-2 text-right">£{{ total_work }}</td>
+        <td class="p-2 text-right">£{{ total_work|floatformat:2 }}</td>
       </tr>
     </tbody>
   </table>
