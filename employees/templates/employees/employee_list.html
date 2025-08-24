@@ -47,7 +47,7 @@
         {% for emp in employees %}
         <tr class="hover:bg-gray-50">
           <td class="p-2">
-            <a href="{% url 'employees:detail' emp.id %}" class="text-blue-600 hover:underline">
+            <a href="{% url 'employees:report' emp.id %}" class="text-blue-600 hover:underline">
               {{ emp.name }}
             </a>
           </td>
@@ -64,9 +64,9 @@
             
             <a href="{% url 'employees:add_salary' emp.id %}" class="px-2 py-1 bg-green-600 text-white rounded">+ Salary</a> -->
 
-            <a href="{% url 'employees:update' emp.id %}" class="px-3 py-1 bg-gray-600 text-white rounded-lg text-sm">✏ Edit</a>
+            <a href="{% url 'employees:update' emp.id %}" class="px-3 py-1 bg-gray-600 text-white rounded-lg text-sm">✏</a>
 
-             <a href="{% url 'employees:delete' emp.id %}" class="px-3 py-1 bg-red-400 text-white rounded-lg text-sm">🗑 Delete</a>
+             <a href="{% url 'employees:delete' emp.id %}" class="px-3 py-1 bg-red-400 text-white rounded-lg text-sm">🗑</a>
           </td>
         </tr>
         {% empty %}

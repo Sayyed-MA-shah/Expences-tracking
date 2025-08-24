@@ -12,9 +12,15 @@
   <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
     <a href="{% url 'dashboard:home' %}" class="font-bold">WINSIDE</a>
     <div class="space-x-4">
-      <a class="px-5 py-2 rounded-lg bg-gray-800 text-white font-medium shadow-md
+      <a class="px-5 py-2 rounded-lg 
+          {% if request.resolver_match.url_name == 'list' %}bg-white text-gray-800{% else %}bg-gray-800 text-white{% endif %}
+          font-medium shadow-md
           transition-all duration-300 ease-in-out
-          hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5" href="{% url 'payments:list' %}">💳 Payments</a>
+          hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5" 
+   href="{% url 'payments:list' %}">
+   💳 Payments
+</a>
+
 
 
       <a class="px-5 py-2 rounded-lg bg-gray-800 text-white font-medium shadow-md

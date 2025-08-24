@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.db import models
 from django.utils.timezone import now
+from django.urls import reverse
 from datetime import datetime
 from .models import ContractualEmployee, WorkRecord, SalaryPayment
 from django import forms
@@ -42,16 +43,26 @@ def employee_create(request):
 # Add daily work record
 def add_work(request, employee_id):
     employee = get_object_or_404(ContractualEmployee, pk=employee_id)
+
     if request.method == "POST":
-        form = WorkRecordForm(request.POST)
-        if form.is_valid():
-            work = form.save(commit=False)
-            work.employee = employee
-            work.save()
-            return redirect("employees:detail", employee_id)
-    else:
-        form = WorkRecordForm()
-    return render(request, "employees/work_form.html", {"form": form, "employee": employee})
+        dates = request.POST.getlist("date")
+        descriptions = request.POST.getlist("description")
+        quantities = request.POST.getlist("quantity")
+        item_prices = request.POST.getlist("item_price")
+
+        for i in range(len(dates)):
+            if quantities[i] and item_prices[i]:  # only save valid rows
+                WorkRecord.objects.create(
+                    employee=employee,
+                    date=dates[i] or timezone.now().date(),
+                    description=descriptions[i],
+                    quantity=int(quantities[i]),
+                    item_price=float(item_prices[i]),
+                )
+        return redirect("employees:report", employee_id)
+
+    return render(request, "employees/work_form.html", {"employee": employee, "today": timezone.now().date()})
+
 
 # Employee detail view
 def employee_detail(request, employee_id):
@@ -130,33 +141,25 @@ def add_salary(request, emp_id):
         "employee": employee,
     })
 
+# ✅ employees/views.py
 def employee_report(request, pk):
     employee = get_object_or_404(ContractualEmployee, pk=pk)
 
-    # Get filter dates
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
 
-    if not start_date:
-        start_date = datetime.now().date()
-    else:
+    if start_date and end_date:
         start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-
-    if not end_date:
-        end_date = datetime.now().date()
-    else:
         end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
 
-    # Filter records
-    work_records = employee.work_records.filter(date__range=[start_date, end_date])
-    salary_payments = employee.salary_payments.filter(date__range=[start_date, end_date])
-    advance_payments = employee.advance_payments.filter(date__range=[start_date, end_date])
+        work_records = employee.work_records.filter(date__range=[start_date, end_date])
+        salary_payments = employee.salary_payments.filter(date__range=[start_date, end_date])
+        advance_payments = employee.advance_payments.filter(date__range=[start_date, end_date])
+    else:
+        work_records = employee.work_records.all()
+        salary_payments = employee.salary_payments.all()
+        advance_payments = employee.advance_payments.all()
 
-    total_work = work_records.aggregate(
-    total=Sum(
-        ExpressionWrapper(F("quantity") * F("item_price"), output_field=DecimalField())
-    )
-    )["total"] or 0
     # Totals
     total_work = sum([wr.quantity * wr.item_price for wr in work_records])
     total_salary = sum([sp.amount for sp in salary_payments])
@@ -176,4 +179,24 @@ def employee_report(request, pk):
         "balance": balance,
         "today": now().date(),
     }
-    return render(request, "employees/employee_report.html", context)
+    return render(request, "employees/employee_detail.html", context)
+
+def delete_work_record(request, pk, record_id):
+    employee = get_object_or_404(ContractualEmployee, pk=pk)
+    record = get_object_or_404(WorkRecord, id=record_id, employee=employee)
+    record.delete()
+    return redirect(reverse("employees:report", args=[employee.id]))
+
+# DELETE Salary Payment
+def delete_salary_payment(request, pk, payment_id):
+    employee = get_object_or_404(ContractualEmployee, pk=pk)
+    payment = get_object_or_404(SalaryPayment, id=payment_id, employee=employee)
+    payment.delete()
+    return redirect(reverse("employees:report", args=[employee.id]))
+
+# DELETE Advance Payment
+def delete_advance_payment(request, pk, advance_id):
+    employee = get_object_or_404(ContractualEmployee, pk=pk)
+    advance = get_object_or_404(AdvancePayment, id=advance_id, employee=employee)
+    advance.delete()
+    return redirect(reverse("employees:report", args=[employee.id]))

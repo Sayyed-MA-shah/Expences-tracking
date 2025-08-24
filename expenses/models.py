@@ -8,11 +8,14 @@ class Expense(models.Model):
         MATERIAL = "MATERIAL", "Material Expense"
         RBG = "RBG", "Rent / Bill / Guest"
         SETUP = "SETUP", "Setup Purchase"
+        OUTSOURCE = "OUTSOURCE", "Outsource"
+        LOGISTICS = "LOGISTICS", "Logistics"
 
     class SubType(models.TextChoices):
         RENT = "RENT", "Rent"
         BILL = "BILL", "Bill"
         GUEST = "GUEST", "Guest"
+        
 
     date = models.DateField(default=timezone.now)
     category = models.CharField(max_length=20, choices=Category.choices)
