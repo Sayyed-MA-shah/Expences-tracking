@@ -91,14 +91,27 @@ class SalaryPayment(models.Model):
     
 # ---------------------- OTHER MODELS ----------------------
 
+
 class FixedEmployee(models.Model):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=20, blank=True, null=True)
-    role = models.CharField(max_length=100)
+    role = models.CharField(max_length=100, blank=True, null=True)
     monthly_salary = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.name
+
+    @property
+    def paid_amount(self):
+        total = self.fixed_payments.aggregate(models.Sum("amount"))["amount__sum"] or 0
+        return total
+
+    @property
+    def balance(self):
+        return self.monthly_salary - self.paid_amount
+
+
+
 
 
 class TemporaryWorker(models.Model):
@@ -133,3 +146,16 @@ class AdvancePayment(models.Model):
     def __str__(self):
         return f"Advance {self.amount} for {self.employee.name} on {self.date}"
 
+
+
+class FixedSalaryPayment(models.Model):
+    employee = models.ForeignKey(
+        FixedEmployee,
+        on_delete=models.CASCADE,
+        related_name="fixed_payments"   # 👈 important
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.employee.name} - {self.amount} on {self.date}"

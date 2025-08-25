@@ -1,5 +1,5 @@
 from django import forms
-from .models import ContractualEmployee, WorkRecord, FixedEmployee
+from .models import ContractualEmployee, WorkRecord, FixedEmployee, FixedSalaryPayment
 
 class ContractualEmployeeForm(forms.ModelForm):
     class Meta:
@@ -11,12 +11,12 @@ class WorkRecordForm(forms.ModelForm):
         model = WorkRecord
         fields = ["date", "quantity", "item_price", "description"]  # ✅ new fields here 
 
-# class AdvancePaymentForm(forms.ModelForm):
-#     class Meta:
-#         model = AdvancePayment
-#         fields = ["amount"] # "employee",
-
 class FixedEmployeeForm(forms.ModelForm):
     class Meta:
         model = FixedEmployee
         fields = ["name", "phone", "role", "monthly_salary"]
+
+class FixedSalaryPaymentForm(forms.ModelForm):
+    class Meta:
+        model = FixedSalaryPayment
+        fields = ["amount"]

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" class="bg-white p-6 rounded-xl shadow space-y-4 max-w-md mx-auto">
+  {% csrf_token %}
+  <h2 class="text-xl font-semibold mb-4">➕ Add Fixed Salary Employee</h2>
+
+  {{ form.as_p }}
+
+  <button type="submit"
+          class="w-full py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+    💾 Save Employee
+  </button>
+</form>
+{% endblock %}

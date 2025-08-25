@@ -7,6 +7,7 @@
     {% if employee %} ✏️ Edit Employee {% else %} ➕ Add New Employee {% endif %}
   </h2>
 
+  <!-- Name -->
   <div>
     <label class="block font-medium mb-1">Full Name</label>
     <input type="text" name="name" value="{{ form.name.value|default_if_none:'' }}"
@@ -14,6 +15,7 @@
            class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
   </div>
 
+  <!-- Phone -->
   <div>
     <label class="block font-medium mb-1">Phone</label>
     <input type="text" name="phone" value="{{ form.phone.value|default_if_none:'' }}"
@@ -21,6 +23,7 @@
            class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
   </div>
 
+  <!-- Role -->
   <div>
     <label class="block font-medium mb-1">Job Role</label>
     <input type="text" name="role" value="{{ form.role.value|default_if_none:'' }}"
@@ -28,9 +31,48 @@
            class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
   </div>
 
+  <!-- Category -->
+  <div>
+    <label class="block font-medium mb-1">Category</label>
+    <select name="category" id="category"
+            class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+      <option value="contractual" {% if form.category.value == "contractual" %}selected{% endif %}>
+        Temporary / Contractual
+      </option>
+      <option value="fixed" {% if form.category.value == "fixed" %}selected{% endif %}>
+        Fixed Salary
+      </option>
+    </select>
+  </div>
+
+  <!-- Salary field (hidden unless Fixed is chosen) -->
+  <div id="salary-field" style="display: {% if form.category.value == 'fixed' %}block{% else %}none{% endif %};">
+    <label class="block font-medium mb-1">Monthly Salary</label>
+    <input type="number" name="salary" value="{{ form.salary.value|default_if_none:'' }}"
+           placeholder="Enter fixed salary"
+           class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+  </div>
+
+  <!-- Save button -->
   <button type="submit"
           class="w-full py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
     💾 {% if employee %} Update Employee {% else %} Save Employee {% endif %}
   </button>
 </form>
+
+<!-- JS to toggle salary field -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const categorySelect = document.getElementById("category");
+    const salaryField = document.getElementById("salary-field");
+
+    categorySelect.addEventListener("change", function () {
+      if (this.value === "fixed") {
+        salaryField.style.display = "block";
+      } else {
+        salaryField.style.display = "none";
+      }
+    });
+  });
+</script>
 {% endblock %}

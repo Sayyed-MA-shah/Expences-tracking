@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="p-6">
+  <h2 class="text-xl font-semibold mb-4">👔 nnnnnnFixed Salary Employees</h2>
+  <a href="{% url 'employees:fixed_employee_create' %}" 
+     class="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700">
+     ➕ Add Fixed Employee
+  </a>
+
+  <table class="w-full mt-4 border">
+    <thead class="bg-gray-200">
+      <tr>
+        <th class="p-2 border">Name</th>
+        <th class="p-2 border">Role</th>
+        <th class="p-2 border">Phone</th>
+        <th class="p-2 border">Salary</th>
+        <th class="p-2 border">Paid</th>
+        <th class="p-2 border">Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for emp in employees %}
+      <tr>
+        <td class="p-2">
+          <a href="{% url 'employees:fixed_employee_report' emp.id %}" class="text-blue-600 hover:underline">
+            {{ emp.name }}
+          </a>
+        </td>
+        <td class="p-2 border">{{ emp.role }}</td>
+        <td class="p-2 border">{{ emp.phone }}</td>
+        <td class="p-2 border">{{ emp.monthly_salary }}</td>
+        <td class="p-2 border">{{ emp.paid_amount }}</td>
+        <td class="p-2 border {% if emp.balance < 0 %}text-red-600{% endif %}">
+          {{ emp.balance }}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="p-2 text-center">No fixed employees yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

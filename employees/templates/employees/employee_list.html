@@ -1,32 +1,65 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="max-w-6xl mx-auto">
+<!-- sumary -->
+ <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm font-medium">Total (All)</h4>
+    <p class="text-2xl font-bold text-blue-600 mt-2">{{ total_all|floatformat:0 }}</p>
+  </div>
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm font-medium">contr/temp paid salary</h4>
+    <p class="text-2xl font-bold text-green-600 mt-2">{{ emp.total_salary_paid}}</p>
+  </div>
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm font-medium">fixed paid salary</h4>
+    <p class="text-2xl font-bold text-yellow-600 mt-2">{{ total_rbg|floatformat:0 }}</p>
+  </div>
+  
+</div>
+  <!-- Header + Add Buttons -->
   <div class="flex justify-between items-center mb-6">
     <h2 class="text-2xl font-semibold">Employees</h2>
-    <a href="{% url 'employees:create' %}" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-      + Add Employee
+    {% if type_filter == "contractual" %}
+      <a href="{% url 'employees:create' %}" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+        + Add Temp Employee
+      </a>
+    {% else %}
+      <a href="{% url 'employees:fixed_employee_create' %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        + Add Fixed Salary Employee
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-4 mb-4">
+    <a href="?type=contractual{% if query %}&q={{ query }}{% endif %}"
+       class="px-4 py-2 rounded-lg shadow {% if type_filter == 'contractual' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+      Temp / Contractual
+    </a>
+    <a href="?type=fixed{% if query %}&q={{ query }}{% endif %}"
+       class="px-4 py-2 rounded-lg shadow {% if type_filter == 'fixed' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+      Fixed Salary
     </a>
   </div>
+
+  <!-- Search -->
   <div class="mb-4">
-  <form method="get" action="" class="flex space-x-2">
-    <input type="text" name="q" value="{{ query|default:'' }}"
-           placeholder="Search by name or phone"
-           class="flex-1 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
-    <button type="submit"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-      🔍 Search
-    </button>
-    {% if query %}
-    <a href="{% url 'employees:list' %}" 
-       class="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400">
-       ❌ Clear
-    </a>
-    {% endif %}
-    
-  </form>
-</div>
+    <form method="get" action="" class="flex space-x-2">
+      <input type="hidden" name="type" value="{{ type_filter }}">
+      <input type="text" name="q" value="{{ query|default:'' }}"
+             placeholder="Search by name or phone"
+             class="flex-1 border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      <button type="submit"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">🔍 Search</button>
+      {% if query %}
+      <a href="?type={{ type_filter }}" class="px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400">❌ Clear</a>
+      {% endif %}
+    </form>
+  </div>
 
-
+  <!-- Contractual Employees Table -->
+  {% if type_filter == "contractual" %}
   <div class="overflow-x-auto bg-white rounded-xl shadow">
     <table class="w-full border-collapse">
       <thead class="bg-gray-100 text-sm text-gray-600">
@@ -34,50 +67,80 @@
           <th class="p-2 text-left">Name</th>
           <th class="p-2 text-left">Phone</th>
           <th class="p-2 text-left">Role</th>
-          
           <th class="p-2 text-left">Total Earned</th>
           <th class="p-2 text-left">Paid (Advances)</th>
           <th class="p-2 text-left">Balance</th>
           <th class="p-2">Actions</th>
-          
-
         </tr>
       </thead>
       <tbody class="divide-y">
         {% for emp in employees %}
         <tr class="hover:bg-gray-50">
-          <td class="p-2">
-            <a href="{% url 'employees:report' emp.id %}" class="text-blue-600 hover:underline">
-              {{ emp.name }}
-            </a>
-          </td>
+          <td class="p-2"><a href="{% url 'employees:report' emp.id %}" class="text-blue-600 hover:underline">{{ emp.name }}</a></td>
           <td class="p-2">{{ emp.phone }}</td>
           <td class="p-2">{{ emp.role }}</td>
-         
           <td class="p-2">£{{ emp.total_earned }}</td>
           <td class="p-2">£{{ emp.total_advances }}</td>
-          <td class="p-2 font-semibold {% if emp.balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">
-            £{{ emp.balance }}
-          </td>
+          <td class="p-2 font-semibold {% if emp.balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">£{{ emp.balance }}</td>
           <td class="p-2 space-x-2">
-            <!-- <a href="{% url 'employees:add_work' emp.id %}" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm">+ Work</a>
-            
-            <a href="{% url 'employees:add_salary' emp.id %}" class="px-2 py-1 bg-green-600 text-white rounded">+ Salary</a> -->
-
             <a href="{% url 'employees:update' emp.id %}" class="px-3 py-1 bg-gray-600 text-white rounded-lg text-sm">✏</a>
-
-             <a href="{% url 'employees:delete' emp.id %}" class="px-3 py-1 bg-red-400 text-white rounded-lg text-sm">🗑</a>
+            <a href="{% url 'employees:delete' emp.id %}" class="px-3 py-1 bg-red-400 text-white rounded-lg text-sm">🗑</a>
           </td>
         </tr>
         {% empty %}
-        <tr>
-          <td colspan="8" class="p-4 text-center text-gray-500">No employees found.</td>
-        </tr>
+        <tr><td colspan="7" class="p-4 text-center text-gray-500">No employees found.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
+  <!-- Fixed Salary Employees Table -->
+  {% else %}
+  <div class="overflow-x-auto bg-white rounded-xl shadow">
+    <table class="w-full border-collapse">
+      <thead class="bg-gray-100 text-sm text-gray-600">
+        <tr>
+          <th class="p-2 text-left">Name</th>
+          <th class="p-2 text-left">Phone</th>
+          <th class="p-2 text-left">Role</th>
+          <th class="p-2 text-left">Salary</th>
+          <th class="p-2 text-left">Paid</th>
+          <th class="p-2 text-left">Balance</th>
+          <th class="p-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y">
+  {% for emp in fixed_employees %}
+  <tr class="hover:bg-gray-50">
+    <td class="p-2">
+      <a href="{% url 'employees:fixed_employee_report' emp.id %}" class="text-blue-600 hover:underline">
+        {{ emp.name }}
+      </a>
+    </td>
+    <td class="p-2">{{ emp.phone }}</td>
+    <td class="p-2">{{ emp.role }}</td>
+    <td class="p-2">£{{ emp.monthly_salary|default:0|floatformat:2 }}</td>
+<td class="p-2">£{{ emp.total_paid_calc|default:0|floatformat:2 }}</td>
+<td class="p-2 font-semibold {% if emp.balance_calc < 0 %}text-red-600{% else %}text-green-600{% endif %}">
+  £{{ emp.balance_calc|default:0|floatformat:2 }}
+</td>
+
+
+    <td class="p-2 space-x-2">
+      <a href="/employees/fixed/{{ emp.id }}/edit/" class="px-3 py-1 bg-gray-600 text-white rounded-lg text-sm">✏</a>
+      <a href="{% url 'employees:fixed_employee_delete' emp.id %}" class="px-3 py-1 bg-red-400 text-white rounded-lg text-sm">🗑</a>
+    </td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="7" class="p-4 text-center text-gray-500">No fixed salary employees found.</td></tr>
+  {% endfor %}
+</tbody>
+
+
+
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
-<!-- <th class="p-2 text-left">Item Price (£)</th>
- <td class="p-2">£{{ emp.item_price }}</td> -->

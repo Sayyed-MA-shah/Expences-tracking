@@ -1,29 +1,61 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from django.db.models.functions import Coalesce
+from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Value, DecimalField, F
 from django.db import models
 from django.utils.timezone import now
 from django.urls import reverse
 from datetime import datetime
-from .models import ContractualEmployee, WorkRecord, SalaryPayment
+from .models import ContractualEmployee, WorkRecord, SalaryPayment, FixedEmployee, FixedSalaryPayment, AdvancePayment
 from django import forms
 from .forms import (
     ContractualEmployeeForm,
     WorkRecordForm,
     FixedEmployeeForm,
+    FixedSalaryPaymentForm,
 )
 
 # Show all employees with totals
 def employee_list(request):
-    query = request.GET.get("q")  # get search term from URL
-    employees = ContractualEmployee.objects.all()
+    query = request.GET.get("q")  # search term
+    type_filter = request.GET.get("type", "contractual")  # controls which tab is active
 
+    # --- Contractual employees (existing logic) ---
+    employees = ContractualEmployee.objects.all()
     if query:
         employees = employees.filter(
-            models.Q(name__icontains=query) | models.Q(phone__icontains=query)
+            Q(name__icontains=query) | Q(phone__icontains=query)
         )
 
+    # --- Fixed employees with computed totals (safe Decimal annotation) ---
+    fixed_qs = FixedEmployee.objects.all()
+    if query:
+        fixed_qs = fixed_qs.filter(
+            Q(name__icontains=query) | Q(phone__icontains=query)
+        )
+
+    fixed_employees = fixed_qs.annotate(
+        total_paid_calc=Coalesce(
+            Sum('fixed_payments__amount'),
+            Value(0),
+            output_field=DecimalField(max_digits=12, decimal_places=2),
+        ),
+        balance_calc=F('monthly_salary') - Coalesce(
+            Sum('fixed_payments__amount'),
+            Value(0),
+            output_field=DecimalField(max_digits=12, decimal_places=2),
+        ),
+    )
+    print(list(fixed_employees.values('id', 'name', 'total_paid_calc', 'balance_calc')))
+
+
+    # 👉 No assigning to emp.balance — avoid clashing with @property
+
     return render(request, "employees/employee_list.html", {
-        "employees": employees,
+        "employees": employees,              # contractual employees
+        "fixed_employees": fixed_employees,  # fixed salary employees with annotations
+        "type_filter": type_filter,
         "query": query,
     })
 
@@ -200,3 +232,106 @@ def delete_advance_payment(request, pk, advance_id):
     advance = get_object_or_404(AdvancePayment, id=advance_id, employee=employee)
     advance.delete()
     return redirect(reverse("employees:report", args=[employee.id]))
+
+# FIXED SALARY EMPLOYEES
+def fixed_employee_list(request):
+    employees = FixedEmployee.objects.all()
+    return render(request, "employees/fixed_employee_list.html", {"employees": employees})
+
+def fixed_employee_create(request):
+    if request.method == "POST":
+        form = FixedEmployeeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("/employees/?type=fixed")
+    else:
+        form = FixedEmployeeForm()
+    return render(request, "employees/fixed_employee_form.html", {"form": form})
+
+from datetime import datetime
+
+def fixed_employee_report(request, pk):
+    employee = get_object_or_404(FixedEmployee, pk=pk)
+
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    payments = FixedSalaryPayment.objects.filter(employee=employee)
+
+
+    if start_date and end_date:
+        try:
+            start = datetime.strptime(start_date, "%Y-%m-%d").date()
+            end = datetime.strptime(end_date, "%Y-%m-%d").date()
+            payments = payments.filter(date__range=[start, end])
+        except ValueError:
+            pass  # ignore invalid input
+
+    total_paid = sum(p.amount for p in payments)
+    total_salary = employee.monthly_salary
+    balance = total_salary - total_paid
+
+    return render(request, "employees/fixed_employee_report.html", {
+        "employee": employee,
+        "payments": payments,
+        "total_paid": total_paid,
+        "total_salary": total_salary,
+        "balance": balance,
+        "start_date": start_date,
+        "end_date": end_date,
+    })
+
+
+def fixed_employee_add_salary(request, employee_id):
+    employee = get_object_or_404(FixedEmployee, id=employee_id)
+
+    if request.method == "POST":
+        form = FixedSalaryPaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.employee = employee
+            payment.save()
+            return redirect("employees:fixed_employee_report", pk=employee.id)
+    else:
+        form = FixedSalaryPaymentForm()
+
+    return render(request, "employees/fixed_employee_add_salary.html", {
+        "form": form,
+        "employee": employee,
+    })
+    
+def fixed_employee_delete(request, pk):
+    employee = get_object_or_404(FixedEmployee, pk=pk)
+    if request.method == "POST":
+        employee.delete()
+        return redirect("/employees/?type=fixed")
+    return render(request, "employees/fixed_employee_confirm_delete.html", {"employee": employee})
+
+
+def fixed_employee_payslip(request, pk):
+    employee = get_object_or_404(FixedEmployee, pk=pk)
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    payments = employee.fixed_payments.all()
+    if start_date and end_date:
+        try:
+            start = datetime.strptime(start_date, "%Y-%m-%d").date()
+            end = datetime.strptime(end_date, "%Y-%m-%d").date()
+            payments = payments.filter(date__range=[start, end])
+        except ValueError:
+            pass
+
+    total_paid = sum(p.amount for p in payments)
+    total_salary = employee.monthly_salary
+    balance = total_salary - total_paid
+
+    return render(request, "employees/fixed_employee_payslip.html", {
+        "employee": employee,
+        "payments": payments,
+        "total_paid": total_paid,
+        "total_salary": total_salary,
+        "balance": balance,
+        "start_date": start_date,
+        "end_date": end_date,
+    })
