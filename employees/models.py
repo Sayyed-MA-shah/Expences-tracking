@@ -155,7 +155,7 @@ class FixedSalaryPayment(models.Model):
         related_name="fixed_payments"  # 👈 important
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=timezone.now)
 
     def __str__(self):
         return f"{self.employee.name} - {self.amount} on {self.date}"

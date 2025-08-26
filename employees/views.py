@@ -84,10 +84,7 @@ def employee_list(request):
 
     salary_total_all = temp_salary_total + fixed_salary_total
 
-    # Advances (Minus Balance) for Contractual/Temp employees
-    # advances_negative_total = sum(
-    #     emp.total_advances for emp in ContractualEmployee.objects.all()
-    # )
+   
 
     return render(request, "employees/employee_list.html", {
         "employees": employees,
@@ -344,6 +341,8 @@ def fixed_employee_add_salary(request, employee_id):
         "form": form,
         "employee": employee,
     })
+
+
     
 def fixed_employee_delete(request, pk):
     employee = get_object_or_404(FixedEmployee, pk=pk)

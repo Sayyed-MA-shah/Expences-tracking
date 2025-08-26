@@ -19,4 +19,4 @@ class FixedEmployeeForm(forms.ModelForm):
 class FixedSalaryPaymentForm(forms.ModelForm):
     class Meta:
         model = FixedSalaryPayment
-        fields = ["amount"]
+        fields = ["amount", "date"]  # ✅ include date field
