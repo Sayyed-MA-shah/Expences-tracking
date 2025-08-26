@@ -4,6 +4,7 @@ from django.db.models.functions import Coalesce
 from django.db.models import Q, Sum
 from django.db.models import Q, Sum, Value, DecimalField, F
 from django.db import models
+from decimal import Decimal
 from django.utils.timezone import now
 from django.urls import reverse
 from datetime import datetime
@@ -17,9 +18,12 @@ from .forms import (
 )
 
 # Show all employees with totals
+
+
+
 def employee_list(request):
     query = request.GET.get("q")  # search term
-    type_filter = request.GET.get("type", "contractual")  # controls which tab is active
+    type_filter = request.GET.get("type", "contractual")  # to control tab state
 
     # --- Contractual employees (existing logic) ---
     employees = ContractualEmployee.objects.all()
@@ -28,7 +32,7 @@ def employee_list(request):
             Q(name__icontains=query) | Q(phone__icontains=query)
         )
 
-    # --- Fixed employees with computed totals (safe Decimal annotation) ---
+    # --- Fixed employees with computed totals ---
     fixed_qs = FixedEmployee.objects.all()
     if query:
         fixed_qs = fixed_qs.filter(
@@ -47,17 +51,58 @@ def employee_list(request):
             output_field=DecimalField(max_digits=12, decimal_places=2),
         ),
     )
-    print(list(fixed_employees.values('id', 'name', 'total_paid_calc', 'balance_calc')))
 
+    # --- Summary cards ---
+    # Salary totals
+    temp_salary_total = (
+        SalaryPayment.objects.aggregate(
+            total=Coalesce(
+                Sum("amount"),
+                Value(0, output_field=DecimalField(max_digits=12, decimal_places=2)),
+            )
+        )["total"]
+        or Decimal("0")
+    )
 
-    # 👉 No assigning to emp.balance — avoid clashing with @property
+    fixed_salary_total = (
+        FixedSalaryPayment.objects.aggregate(
+            total=Coalesce(
+                Sum("amount"),
+                Value(0, output_field=DecimalField(max_digits=12, decimal_places=2)),
+            )
+        )["total"]
+        or Decimal("0")
+    )
+    contract_advances = sum(emp.total_advances for emp in ContractualEmployee.objects.all())
+    fixed_advances = sum(
+        (emp.total_paid_calc - emp.monthly_salary)
+        if (emp.total_paid_calc - emp.monthly_salary) > 0 else Decimal("0")
+        for emp in fixed_employees
+    )
+
+    advances_negative_total = contract_advances + fixed_advances
+
+    salary_total_all = temp_salary_total + fixed_salary_total
+
+    # Advances (Minus Balance) for Contractual/Temp employees
+    # advances_negative_total = sum(
+    #     emp.total_advances for emp in ContractualEmployee.objects.all()
+    # )
 
     return render(request, "employees/employee_list.html", {
-        "employees": employees,              # contractual employees
-        "fixed_employees": fixed_employees,  # fixed salary employees with annotations
+        "employees": employees,
+        "fixed_employees": fixed_employees,
         "type_filter": type_filter,
         "query": query,
+
+        # Summary cards
+        "temp_salary_total": temp_salary_total,
+        "fixed_salary_total": fixed_salary_total,
+        "salary_total_all": salary_total_all,
+        "advances_negative_total": advances_negative_total,
+        "advances_negative_total": advances_negative_total,
     })
+
 
 
 # Create a new employee

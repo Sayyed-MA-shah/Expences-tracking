@@ -1,20 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="max-w-6xl mx-auto">
-<!-- sumary -->
- <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+<!-- Summary -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
   <div class="bg-white shadow rounded-xl p-6 text-center">
     <h4 class="text-gray-500 text-sm font-medium">Total (All)</h4>
-    <p class="text-2xl font-bold text-blue-600 mt-2">{{ total_all|floatformat:0 }}</p>
+    <p class="text-2xl font-bold text-blue-600 mt-2">
+      £{{ salary_total_all|floatformat:2 }}
+    </p>
   </div>
+
   <div class="bg-white shadow rounded-xl p-6 text-center">
-    <h4 class="text-gray-500 text-sm font-medium">contr/temp paid salary</h4>
-    <p class="text-2xl font-bold text-green-600 mt-2">{{ emp.total_salary_paid}}</p>
+    <h4 class="text-gray-500 text-sm font-medium">Contr/Temp Paid Salary</h4>
+    <p class="text-2xl font-bold text-green-600 mt-2">
+      £{{ temp_salary_total|floatformat:2 }}
+    </p>
   </div>
+
   <div class="bg-white shadow rounded-xl p-6 text-center">
-    <h4 class="text-gray-500 text-sm font-medium">fixed paid salary</h4>
-    <p class="text-2xl font-bold text-yellow-600 mt-2">{{ total_rbg|floatformat:0 }}</p>
+    <h4 class="text-gray-500 text-sm font-medium">Fixed Paid Salary</h4>
+    <p class="text-2xl font-bold text-yellow-600 mt-2">
+      £{{ fixed_salary_total|floatformat:2 }}
+    </p>
   </div>
+
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm font-medium">Advances (Minus Balance)</h4>
+    <p class="text-2xl font-bold text-red-600 mt-2">
+      £{{ advances_negative_total|floatformat:2 }}
+    </p>
+  </div>
+</div>
+
   
 </div>
   <!-- Header + Add Buttons -->
