@@ -1,12 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-<form method="post" class="bg-white p-6 rounded-xl shadow space-y-4 max-w-md mx-auto">
+<form method="post" class="max-w-2xl mx-auto bg-white rounded-2xl shadow p-6 space-y-6">
   {% csrf_token %}
 
+  <div class="flex items-center justify-between">
   <h2 class="text-xl font-semibold mb-4">
-    {% if employee %} ✏️ Edit Employee {% else %} ➕ Add New Employee {% endif %}
-  </h2>
+    {% if employee %} ✏️ Edit Employee {% else %} 👤 Add New Employee {% endif %}</h2>
+     <a href="javascript:history.back()" 
+       class="text-sm px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700">
+       ← Back
+    </a>
+  </div>
 
+   <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
+    This employee will be paid a per item price. You can record payments from their report page.
+  </div>
   <!-- Name -->
   <div>
     <label class="block font-medium mb-1">Full Name</label>
@@ -31,27 +39,7 @@
            class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
   </div>
 
-  <!-- Category -->
-  <div>
-    <label class="block font-medium mb-1">Category</label>
-    <select name="category" id="category"
-            class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
-      <option value="contractual" {% if form.category.value == "contractual" %}selected{% endif %}>
-        Temporary / Contractual
-      </option>
-      <option value="fixed" {% if form.category.value == "fixed" %}selected{% endif %}>
-        Fixed Salary
-      </option>
-    </select>
-  </div>
-
-  <!-- Salary field (hidden unless Fixed is chosen) -->
-  <div id="salary-field" style="display: {% if form.category.value == 'fixed' %}block{% else %}none{% endif %};">
-    <label class="block font-medium mb-1">Monthly Salary</label>
-    <input type="number" name="salary" value="{{ form.salary.value|default_if_none:'' }}"
-           placeholder="Enter fixed salary"
-           class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
-  </div>
+ 
 
   <!-- Save button -->
   <button type="submit"

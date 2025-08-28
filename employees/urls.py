@@ -31,6 +31,8 @@ urlpatterns = [
      path("fixed/<int:pk>/report/", views.fixed_employee_report, name="fixed_employee_report"),
      path("fixed/<int:employee_id>/add-salary/", views.fixed_employee_add_salary, name="fixed_employee_add_salary"),
      path("fixed/<int:pk>/delete/", views.fixed_employee_delete, name="fixed_employee_delete"),
+     path("fixed/<int:pk>/edit/", views.fixed_employee_update, name="fixed_employee_update"),
+     
     #  fixed amployee payslip
     path("fixed/<int:pk>/payslip/", views.fixed_employee_payslip, name="fixed_employee_payslip"),
 

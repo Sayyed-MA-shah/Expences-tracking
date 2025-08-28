@@ -190,9 +190,28 @@ def payslip(request, employee_id):
 
 # --- Salary Payment Form ---
 class SalaryPaymentForm(forms.ModelForm):
+    amount = forms.DecimalField(
+        label="Amount (£)",
+        min_value=0,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={
+            "class": "w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500",
+            "placeholder": "Enter salary amount",
+            "step": "0.01"
+        })
+    )
+
+    date = forms.DateField(
+        label="Date",
+        initial=timezone.now().date,
+        widget=forms.DateInput(attrs={
+            "type": "date",
+            "class": "w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
+        })
+    )
     class Meta:
         model = SalaryPayment
-        fields = ["amount"]
+        fields = ["amount", "date"]
 
 
 # Add Salary (handles auto-advance if overpaid)
@@ -230,9 +249,10 @@ def employee_report(request, pk):
         salary_payments = employee.salary_payments.filter(date__range=[start_date, end_date])
         advance_payments = employee.advance_payments.filter(date__range=[start_date, end_date])
     else:
-        work_records = employee.work_records.all()
-        salary_payments = employee.salary_payments.all()
-        advance_payments = employee.advance_payments.all()
+        work_records = employee.work_records.all().order_by('-date')
+        
+        salary_payments = employee.salary_payments.all().order_by('-date')
+        advance_payments = employee.advance_payments.all().order_by('-date')
 
     # Totals
     total_work = sum([wr.quantity * wr.item_price for wr in work_records])
@@ -268,6 +288,8 @@ def delete_salary_payment(request, pk, payment_id):
     payment.delete()
     return redirect(reverse("employees:report", args=[employee.id]))
 
+
+
 # DELETE Advance Payment
 def delete_advance_payment(request, pk, advance_id):
     employee = get_object_or_404(ContractualEmployee, pk=pk)
@@ -298,7 +320,8 @@ def fixed_employee_report(request, pk):
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
 
-    payments = FixedSalaryPayment.objects.filter(employee=employee)
+    payments = FixedSalaryPayment.objects.filter(employee=employee).order_by('-date')
+    
 
 
     if start_date and end_date:
@@ -306,6 +329,7 @@ def fixed_employee_report(request, pk):
             start = datetime.strptime(start_date, "%Y-%m-%d").date()
             end = datetime.strptime(end_date, "%Y-%m-%d").date()
             payments = payments.filter(date__range=[start, end])
+        
         except ValueError:
             pass  # ignore invalid input
 
@@ -341,8 +365,6 @@ def fixed_employee_add_salary(request, employee_id):
         "form": form,
         "employee": employee,
     })
-
-
     
 def fixed_employee_delete(request, pk):
     employee = get_object_or_404(FixedEmployee, pk=pk)
@@ -351,6 +373,20 @@ def fixed_employee_delete(request, pk):
         return redirect("/employees/?type=fixed")
     return render(request, "employees/fixed_employee_confirm_delete.html", {"employee": employee})
 
+def fixed_employee_update(request, pk):
+    employee = get_object_or_404(FixedEmployee, pk=pk)
+    if request.method == "POST":
+        form = FixedEmployeeForm(request.POST, instance=employee)
+        if form.is_valid():
+            form.save()
+            return redirect("/employees/?type=fixed")
+    else:
+        form = FixedEmployeeForm(instance=employee)
+
+    return render(request, "employees/fixed_employee_form.html", {
+        "form": form,
+        "title": f"Update Employee: {employee.name}"
+    })
 
 def fixed_employee_payslip(request, pk):
     employee = get_object_or_404(FixedEmployee, pk=pk)

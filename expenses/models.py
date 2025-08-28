@@ -10,6 +10,7 @@ class Expense(models.Model):
         SETUP = "SETUP", "Setup Purchase"
         OUTSOURCE = "OUTSOURCE", "Outsource"
         LOGISTICS = "LOGISTICS", "Logistics"
+    
 
     class SubType(models.TextChoices):
         RENT = "RENT", "Rent"

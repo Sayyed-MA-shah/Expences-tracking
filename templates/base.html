@@ -3,36 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}WINSIDE{% endblock %}</title>
+  <title>{% block title %}NASHAH{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50">
   {% if not request.resolver_match.url_name == "login" %}
 <nav class="bg-white border-b">
   <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="{% url 'dashboard:home' %}" class="font-bold">WINSIDE</a>
+    <a href="{% url 'dashboard:home' %}" class="font-bold">NASHAH</a>
     <div class="space-x-4">
-      <a class="px-5 py-2 rounded-lg 
-          {% if request.resolver_match.url_name == 'list' %}bg-white text-gray-800{% else %}bg-gray-800 text-white{% endif %}
-          font-medium shadow-md
-          transition-all duration-300 ease-in-out
-          hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5" 
-   href="{% url 'payments:list' %}">
+      <a href="{% url 'payments:list' %}" 
+   class="px-5 py-2 rounded-lg font-medium shadow-md transition-all duration-300 ease-in-out hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5
+   {% if 'payments' in request.resolver_match.namespace %} bg-white text-gray-800 {% else %} bg-gray-800 text-white {% endif %}">
    💳 Payments
 </a>
 
+<a href="{% url 'expenses:list' %}" 
+   class="px-5 py-2 rounded-lg font-medium shadow-md transition-all duration-300 ease-in-out hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5
+   {% if 'expenses' in request.resolver_match.namespace %} bg-white text-gray-800 {% else %} bg-gray-800 text-white {% endif %}">
+   🧾 Expenses
+</a>
 
+<a href="{% url 'employees:list' %}" 
+   class="px-5 py-2 rounded-lg font-medium shadow-md transition-all duration-300 ease-in-out hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5
+   {% if 'employees' in request.resolver_match.namespace %} bg-white text-gray-800 {% else %} bg-gray-800 text-white {% endif %}">
+   👨‍🔧 Employees
+</a>
 
-      <a class="px-5 py-2 rounded-lg bg-gray-800 text-white font-medium shadow-md
-          transition-all duration-300 ease-in-out
-          hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5" href="{% url 'expenses:list' %}">🧾 Expenses</a>
-
-      <a href="{% url 'employees:list' %}" 
-          class="px-5 py-2 rounded-lg bg-gray-800 text-white font-medium shadow-md
-          transition-all duration-300 ease-in-out
-          hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5">
-            👨‍🔧 Employees
-      </a>
 
 
       {% if user.is_authenticated %}

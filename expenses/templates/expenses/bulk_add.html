@@ -4,6 +4,25 @@
 {% block content %}
 <h1 class="text-2xl font-semibold mb-6">Add Multiple Expenses</h1>
 
+<!-- Feedback messages -->
+{% if messages %}
+  {% for message in messages %}
+    <div class="mb-4 p-2 rounded 
+      {% if message.tags == 'success' %}
+        bg-green-100 text-green-700
+      {% elif message.tags == 'error' or message.tags == 'danger' %}
+        bg-red-100 text-red-700
+      {% elif message.tags == 'warning' %}
+        bg-yellow-100 text-yellow-700
+      {% else %}
+        bg-blue-100 text-blue-700
+      {% endif %}
+    ">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
 <form method="post">
   {% csrf_token %}
 
@@ -12,28 +31,47 @@
       <tr class="bg-gray-100">
         <th class="p-2">Date</th>
         <th class="p-2">Category</th>
+        <th class="p-2">Sub Type (RBG)</th>
         <th class="p-2">Amount</th>
         <th class="p-2">Description</th>
+        <th class="p-2">Remove</th>
       </tr>
     </thead>
-    <tbody id="expense-rows">
-  <tr>
-    <td><input type="date" name="date[]" value="{{ today }}" class="border rounded p-1 w-full"></td>
-    <td>
-      <select name="category[]" class="border rounded p-1 w-full">
-        <option value="MATERIAL">Material Expense</option>
-        <option value="RBG">Rent / Bill / Guest</option>
-        <option value="SETUP">Setup Purchase</option>
-        <option value="SETUP">Logistic</option>
-        <option value="SETUP">Outsource</option>
-      </select>
-    </td>
-    <td><input type="number" step="0.01" name="amount[]" class="border rounded p-1 w-full"></td>
-    <td><input type="text" name="description[]" class="border rounded p-1 w-full"></td>
-    <td><button type="button" onclick="deleteRow(this)" class="text-red-600 font-bold">❌</button></td>
-  </tr>
-</tbody>
 
+    <tbody id="expense-rows">
+      <tr>
+        <td>
+          <input type="date" name="date[]" value="{{ today }}" class="border rounded p-1 w-full">
+        </td>
+        <td>
+          <select name="category[]" class="border rounded p-1 w-full category-select" onchange="toggleSubType(this)">
+            <option value="">-- Select --</option>
+            <option value="MATERIAL">Material Expense</option>
+            <option value="RBG">Rent / Bill / Guest</option>
+            <option value="SETUP">Setup Purchase</option>
+            <option value="OUTSOURCE">Outsource</option>
+            <option value="LOGISTICS">Logistics</option>
+          </select>
+        </td>
+        <td>
+          <select name="sub_type[]" class="border rounded p-1 w-full sub-type-select" style="display:none;">
+            <option value="">-- Select --</option>
+            <option value="RENT">Rent</option>
+            <option value="BILL">Bill</option>
+            <option value="GUEST">Guest</option>
+          </select>
+        </td>
+        <td>
+          <input type="number" step="0.01" name="amount[]" class="border rounded p-1 w-full">
+        </td>
+        <td>
+          <input type="text" name="description[]" class="border rounded p-1 w-full">
+        </td>
+        <td>
+          <button type="button" onclick="deleteRow(this)" class="text-red-600 font-bold">❌</button>
+        </td>
+      </tr>
+    </tbody>
   </table>
 
   <div class="flex gap-4 mt-4">
@@ -41,48 +79,64 @@
     <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">💾 Save All</button>
   </div>
 </form>
+
 <script>
-    
+function toggleSubType(select) {
+  const row = select.closest("tr");
+  const subType = row.querySelector(".sub-type-select");
+  if (select.value === "RBG") {
+    subType.style.display = "block";
+  } else {
+    subType.style.display = "none";
+    subType.value = ""; // reset for non-RBG
+  }
+}
+
 function addRow() {
   const tbody = document.getElementById("expense-rows");
   const newRow = document.createElement("tr");
 
   newRow.innerHTML = `
-    <td><input type="date" name="date[]" value="{{ today }}" class="border rounded p-1 w-full"></td>
     <td>
-      <select name="category[]" class="border rounded p-1 w-full">
+      <input type="date" name="date[]" value="{{ today }}" class="border rounded p-1 w-full">
+    </td>
+    <td>
+      <select name="category[]" class="border rounded p-1 w-full category-select" onchange="toggleSubType(this)">
+        <option value="">-- Select --</option>
         <option value="MATERIAL">Material Expense</option>
         <option value="RBG">Rent / Bill / Guest</option>
         <option value="SETUP">Setup Purchase</option>
+        <option value="OUTSOURCE">Outsource</option>
+        <option value="LOGISTICS">Logistics</option>
       </select>
     </td>
-    <td><input type="number" step="0.01" name="amount[]" class="border rounded p-1 w-full"></td>
-    <td><input type="text" name="description[]" class="border rounded p-1 w-full"></td>
-    <td><button type="button" onclick="deleteRow(this)" class="text-red-600 font-bold">❌</button></td>
+    <td>
+      <select name="sub_type[]" class="border rounded p-1 w-full sub-type-select" style="display:none;">
+        <option value="">-- Select --</option>
+        <option value="RENT">Rent</option>
+        <option value="BILL">Bill</option>
+        <option value="GUEST">Guest</option>
+      </select>
+    </td>
+    <td>
+      <input type="number" step="0.01" name="amount[]" class="border rounded p-1 w-full">
+    </td>
+    <td>
+      <input type="text" name="description[]" class="border rounded p-1 w-full">
+    </td>
+    <td>
+      <button type="button" onclick="deleteRow(this)" class="text-red-600 font-bold">❌</button>
+    </td>
   `;
+
   tbody.appendChild(newRow);
 }
+
 function deleteRow(button) {
   button.closest("tr").remove();
 }
-</script>
 
-
-<script>
-  document.getElementById("add-more").addEventListener("click", function() {
-    let totalForms = document.getElementById("id_form-TOTAL_FORMS");
-    let currentForms = parseInt(totalForms.value);
-    let newForm = document.querySelector("tbody tr").cloneNode(true);
-
-    // Clear inputs
-    newForm.querySelectorAll("input, select").forEach(input => {
-      input.name = input.name.replace(`-${currentForms-1}-`, `-${currentForms}-`);
-      input.id = input.id.replace(`-${currentForms-1}-`, `-${currentForms}-`);
-      if (input.type !== "hidden") input.value = "";
-    });
-
-    document.querySelector("tbody").appendChild(newForm);
-    totalForms.value = currentForms + 1;
-  });
+// Initialize the first row's subtype visibility (if category preselected)
+document.querySelectorAll(".category-select").forEach(toggleSubType);
 </script>
 {% endblock %}

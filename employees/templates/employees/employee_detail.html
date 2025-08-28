@@ -3,24 +3,6 @@
 
 {% block content %}
 <h1 class="text-2xl font-bold mb-6">Employee: {{ employee.name }}</h1>
-
-<!-- ====== Top Buttons ====== -->
-<div class="mb-6 flex flex-wrap gap-3">
-  <a href="{% url 'employees:add_work' employee.id %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">+ Add Work</a>
-  <a href="{% url 'employees:add_salary' employee.id %}" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">+ Add Salary</a>
-  <a href="{% url 'employees:payslip' employee.id %}" class="px-4 py-2 bg-gray-700 text-white rounded-lg shadow hover:bg-gray-800">🧾 Payslip</a>
-    <button type="button" onclick="window.print()" class="px-4 py-2 bg-green-600 text-white rounded">🖨 Print</button>
-  <a href="{% url 'employees:report' employee.id %}" class="px-4 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">📄 Generate Report</a>
-</div>
-
-<!-- ====== Date Filter ====== -->
-<form method="get" class="flex flex-wrap gap-3 mb-6">
-  <input type="date" name="start_date" value="{{ start_date }}" class="border p-2 rounded">
-  <input type="date" name="end_date" value="{{ end_date }}" class="border p-2 rounded">
-  <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Apply</button>
-</form>
-
-<!-- ====== Employee Summary ====== -->
 <!-- ====== Employee Summary ====== -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
   <div class="bg-white shadow rounded-xl p-6 text-center">
@@ -42,9 +24,33 @@
     </p>
   </div>
 </div>
+<!-- ====== Top Buttons ====== -->
+<!-- ====== Toolbar Wrapper ====== -->
+<div class="flex justify-between items-center mb-6 no-print gap-3">
+
+  <!-- Left: Date Filter -->
+  <form method="get" class="flex items-center gap-3">
+    <input type="date" name="start_date" value="{{ start_date }}" class="border p-2 rounded">
+    <input type="date" name="end_date" value="{{ end_date }}" class="border p-2 rounded">
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Apply</button>
+  </form>
+
+  <!-- Right: Action Buttons -->
+  <div class="flex items-center gap-3">
+    <a href="{% url 'employees:add_work' employee.id %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">+ Add Work</a>
+    <a href="{% url 'employees:add_salary' employee.id %}" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">+ Add Salary</a>
+    <a href="{% url 'employees:payslip' employee.id %}" class="px-4 py-2 bg-gray-700 text-white rounded-lg shadow hover:bg-gray-800">🧾 Payslip</a>
+    <!-- <a href="{% url 'employees:report' employee.id %}" class="px-4 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">📄 Generate Report</a> -->
+    <button type="button" onclick="window.print()" class="px-4 py-2 bg-green-600 text-white rounded">🖨 Print</button>
+  </div>
+
+</div>
+
+<!-- ====== Employee Summary ====== -->
+
 <!-- ====== Work Records ====== -->
 <div class="bg-white shadow rounded-xl mb-8 overflow-x-auto">
-  <div class="border-b px-6 py-3">
+  <div class="border-b px-6 py-3 ">
     <h2 class="text-lg font-semibold">🛠 Work Records</h2>
   </div>
   <table class="w-full text-sm">
@@ -55,7 +61,7 @@
         <th class="p-2 text-center">Quantity</th>
         <th class="p-2 text-right">Item Price</th>
         <th class="p-2 text-right">Total</th>
-        <th class="p-2">Actions</th>
+        <th class="p-2 no-print">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -66,9 +72,9 @@
         <td class="p-2 text-center">{{ w.quantity }}</td>
         <td class="p-2 text-right">£{{ w.item_price }}</td>
         <td class="p-2 text-right">£{{ w.total }}</td>
-        <td class="p-2 text-center">
+        <td class="p-2 text-center no-print">
         <a href="{% url 'employees:delete_work_record' employee.id w.id %}"
-           class="text-red-600 hover:underline"
+           class="text-red-600 hover:underline no-print"
            onclick="return confirm('Delete this advance payment?')">🗑 Delete</a>
       </td>
       </tr>
@@ -85,7 +91,7 @@
 
 <!-- ====== Salary Payments ====== -->
 <div class="bg-white shadow rounded-xl mb-8 overflow-x-auto">
-  <div class="border-b px-6 py-3">
+  <div class="border-b px-6 py-3 page-break">
     <h2 class="text-lg font-semibold">💷 Salary Payments</h2>
   </div>
   <table class="w-full text-sm">
@@ -93,7 +99,7 @@
       <tr>
         <th class="p-2 text-left">Date</th>
         <th class="p-2 text-right">Amount</th>
-        <th class="p-2">Actions</th>
+        <th class="p-2 no-print">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -101,9 +107,9 @@
       <tr class="border-t">
         <td class="p-2">{{ sp.date }}</td>
         <td class="p-2 text-right">£{{ sp.amount }}</td>
-        <td class="p-2 text-center">
+        <td class="p-2 text-center no-print">
         <a href="{% url 'employees:delete_salary_payment' employee.id sp.id %}"
-           class="text-red-600 hover:underline"
+           class="text-red-600 hover:underline no-print"
            onclick="return confirm('Delete this salary payment?')">🗑 Delete</a>
       </td>
       </tr>
@@ -148,7 +154,7 @@
 </div> -->
 
 <!-- ====== Back Button ====== -->
-<div class="mt-6">
+<div class="mt-6 no-print">
   <a href="{% url 'employees:list' %}" class="px-5 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-700">
     ← Back to Employees
   </a>
@@ -160,4 +166,35 @@
     body { background: white !important; }
   }
 </style>
+<style>
+/* Hide controls/buttons when printing */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  /* Force page break after Work Records */
+  .page-break {
+    page-break-before: always;  /* ensures new page */
+    break-before: page;         /* modern browsers */
+  }
+
+  /* Optional: make printed content cleaner */
+  body {
+    font-size: 12pt;
+    color: #000;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 6px;
+  }
+}
+</style>
+
 {% endblock %}

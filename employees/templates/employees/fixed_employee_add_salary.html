@@ -1,15 +1,70 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow">
-  <h2 class="text-xl font-semibold mb-4">Add Salary Payment – {{ employee.name }}</h2>
 
-  <form method="post" class="space-y-4">
+<div class="max-w-lg mx-auto bg-white rounded-2xl shadow p-6 space-y-6">
+
+  <!-- Header & Context -->
+  <div class="flex items-center justify-between">
+    <h2 class="text-2xl font-bold">💵 Add Salary Payment</h2>
+    <a href="{% url 'employees:fixed_employee_report' employee.id %}"
+       class="text-sm px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700">
+       ← Back to Report
+    </a>
+  </div>
+
+  <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
+    Adding payment for: <strong>{{ employee.name }}</strong>
+  </div>
+
+  <!-- Form -->
+  <form method="post" class="space-y-5">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit"
-            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-      💾 Save Payment
-    </button>
+
+    <!-- Amount -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-1">
+        Amount (£)
+      </label>
+      <div class="relative">
+        <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">£</span>
+        <input type="number" name="amount" step="0.01" min="0"
+               value="{{ form.amount.value|default_if_none:'' }}"
+               placeholder="Enter amount e.g. 1200.00"
+               class="w-full border rounded-lg pl-8 pr-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500">
+      </div>
+      {% if form.amount.errors %}
+        <p class="text-red-600 text-sm mt-1">{{ form.amount.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Date -->
+    <div>
+      <label class="block text-sm font-semibold text-gray-700 mb-1">
+        Payment Date
+      </label>
+      <input type="date" name="date"
+             value="{{ form.date.value|default:'' }}"
+             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500">
+      {% if form.date.errors %}
+        <p class="text-red-600 text-sm mt-1">{{ form.date.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Submit -->
+    <div class="pt-2">
+      <button type="submit"
+              class="w-full bg-green-600 text-white py-3 rounded-lg shadow hover:bg-green-700 active:translate-y-px transition">
+        💾 Save Payment
+      </button>
+    </div>
   </form>
+
+  {% if form.non_field_errors %}
+  <div class="bg-red-50 text-red-700 p-3 rounded-lg">
+    {{ form.non_field_errors }}
+  </div>
+  {% endif %}
+
 </div>
+
 {% endblock %}

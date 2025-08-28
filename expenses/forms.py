@@ -17,7 +17,9 @@ class ExpenseForm(forms.ModelForm):
             "sub_type": forms.Select(attrs={"class": SELECT_INPUT, "id": "id_sub_type"}),
             "description": forms.TextInput(attrs={"placeholder": "Optional details", "class": BASE_INPUT}),
             "amount": forms.NumberInput(attrs={"step": "0.01", "min": "0", "class": BASE_INPUT}),
+            
         }
+
 
     def clean(self):
         cleaned = super().clean()

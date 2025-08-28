@@ -3,7 +3,7 @@
 <div class="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow space-y-6">
 
   <!-- Header -->
-  <div class="flex justify-between items-center border-b pb-3">
+  <div class="flex justify-between items-center border-b pb-3 no-print">
     <h2 class="text-2xl font-bold text-gray-800">
       {{ employee.name }} – <span class="text-gray-600">Fixed Salary Report</span>
     </h2>
@@ -12,6 +12,7 @@
          class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">
          + Add Salary
       </a>
+      <button type="button" onclick="window.print()" class="px-4 py-2 bg-green-600 text-white rounded">🖨 Print</button>
       <a href="{% url 'employees:fixed_employee_payslip' employee.id %}?start_date={{ start_date }}&end_date={{ end_date }}" 
          class="px-4 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">
          🧾 Payslip
@@ -28,7 +29,7 @@
   </div>
 
   <!-- Date Filter -->
-  <form method="get" class="flex space-x-3 items-center bg-gray-100 p-3 rounded-lg">
+  <form method="get" class="flex space-x-3 items-center bg-gray-100 p-3 rounded-lg no-print">
     <label class="flex items-center space-x-1">
       <span>From:</span>
       <input type="date" name="start_date" value="{{ start_date }}" class="border rounded p-1">
@@ -52,6 +53,7 @@
         <tr>
           <th class="p-2 text-left">Date</th>
           <th class="p-2 text-left">Amount Paid</th>
+          <th class="p-1text-left">Action</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y">
@@ -59,6 +61,7 @@
         <tr class="hover:bg-gray-50">
           <td class="p-2">{{ payment.date }}</td>
           <td class="p-2 font-semibold text-green-700">£{{ payment.amount }}</td>
+          
         </tr>
         {% empty %}
         <tr><td colspan="2" class="p-2 text-center text-gray-500">No payments found.</td></tr>
@@ -78,4 +81,12 @@
   </div>
 
 </div>
+
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    nav, footer { display: none !important; }
+    body { background: white !important; }
+  }
+</style>
 {% endblock %}

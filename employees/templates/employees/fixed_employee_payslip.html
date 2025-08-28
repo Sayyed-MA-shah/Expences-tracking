@@ -38,5 +38,14 @@
       </tr>
     </tfoot>
   </table>
+  <hr><br>
+  <div> <button type="button" onclick="window.print()" class="px-4 py-2 bg-green-600 text-white rounded no-print">🖨 Print</button></div>
 </div>
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    nav, footer { display: none !important; }
+    body { background: white !important; }
+  }
+</style>
 {% endblock %}

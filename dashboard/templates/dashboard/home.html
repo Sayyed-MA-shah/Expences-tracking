@@ -18,64 +18,37 @@
         <p class="text-2xl font-bold text-blue-600 mt-2">{{ balance_month|floatformat:0 }}</p>
     </div>
     <br>
-    <div class="bg-white shadow rounded-xl p-6 text-center">
-        <h4 class="text-gray-500 text-sm font-medium">Total Advance Paid</h4>
-        <p class="text-2xl font-bold text-red-600 mt-2">{{ total_advances  }}</p>
     </div>
-    <div class="bg-white shadow rounded-xl p-6 text-center">
-        <h4 class="text-gray-500 text-sm font-medium">Total Salary Paid</h4>
-        <p class="text-2xl font-bold text-blue-600 mt-2">{{ total_salary_paid }}</p>
-    </div>
-   
-    </div>
- <!-- <div class="bg-white rounded-xl shadow p-4">
-  <h3 class="text-lg font-semibold">Employee Salary Overview</h3>
-  <p><strong>💰 Salary Paid:</strong> £{{ total_advance_paid }}</p>
-  <p><strong>⚡ Advance Salaries:</strong> £{{ total_advance_paid }}</p>
-  <p><strong>📌 Salary Pending:</strong> £{{ salary_pending }}</p>
-</div> -->
-    <div class="grid grid-cols-2 gap-6">
-  <!-- <div class="bg-white shadow rounded-xl p-6">
-    <h3 class="text-lg font-semibold">💵 Advance Salaries</h3>
-    <p class="text-2xl text-yellow-600">£{{ total_advance }}</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+  <div class="bg-black shadow rounded-xl p-6 text-center">
+    <h4 class="text-white text-sm font-medium">Total Paid Salaries</h4>
+    <p class="text-2xl font-bold text-white mt-2">
+      £{{ salary_total_all|floatformat:2 }}
+    </p>
   </div>
 
-  <div class="bg-white shadow rounded-xl p-6">
-    <h3 class="text-lg font-semibold">✅ Salaries Paid</h3>
-    <p class="text-2xl text-green-600">£{{ total_salary_paid }}</p>
-  </div> -->
- 
 
 
-
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm font-medium">Advances (Minus Balance)</h4>
+    <p class="text-2xl font-bold text-red-600 mt-2">
+      £{{ total_advances|floatformat:2 }}
+    </p>
+  </div>
 </div>
 
-<hr>
 
-<!-- ===== Navigation Cards ===== -->
-<div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-  <a href="{% url 'payments:list' %}" class="block bg-white p-4 rounded-xl shadow hover:shadow-md">
-    <h2 class="font-semibold">Payment Detail</h2>
-    <p class="text-sm text-gray-600">Enter pay-ins, view totals and balance.</p>
-  </a>
 
-  <!-- Daily Expenses (all categories) -->
-  <a href="{% url 'expenses:list' %}" class="block bg-white p-4 rounded-xl shadow hover:shadow-md">
-    <h2 class="font-semibold">Daily Expenses</h2>
-    <p class="text-sm text-gray-600">Material, Rent/Bill/Guest, Setup Purchases.</p>
-  </a>
 
-  <!-- Employees -->
-  <a  href="{% url 'employees:list' %}" class="block bg-white p-4 rounded-xl shadow hover:shadow-md">
-     <h2 class="font-semibold">Employees</h2>
-    <p class="text-sm text-gray-600">Contractual, Temp, Fixed salary.</p>
-  </a>
-</div>
 
-<hr class="my-8 border-gray-200">
+
+
+<hr class="my-8 border-black">
 
 <!-- ===== Custom Date Range Section ===== -->
 <h3 class="text-lg font-semibold mb-4">Custom Date Range</h3>
+
 <form method="get" class="flex flex-wrap items-center gap-4 mb-6">
     <div>
         <label for="start_date" class="block text-sm font-medium text-gray-700">From</label>
@@ -89,7 +62,7 @@
                class="border rounded-lg p-2 mt-2 block w-48 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
     </div>
 
-    <div class="mt-5">
+    <div class="mt-7">
         <button type="submit"
                 class="px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
             Apply Filter
