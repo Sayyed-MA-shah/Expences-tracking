@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow">
+  <h2 class="text-xl font-semibold mb-4 text-red-600">⚠️ Delete Payment</h2>
+  <p>
+    Are you sure you want to delete this payment
+    {% if payment.date %} dated <strong>{{ payment.date }}</strong>{% endif %}
+    {% if payment.amount %} for <strong>PKR {{ payment.amount }}</strong>{% endif %}?
+  </p>
+
+  <form method="post" class="mt-4 space-x-2">
+    {% csrf_token %}
+    <input type="hidden" name="return" value="{{ return_url|default:'' }}">
+    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+      Yes, Delete
+    </button>
+    {% if return_url %}
+      <a href="{{ return_url }}#payments-table" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">
+        Cancel
+      </a>
+    {% else %}
+      <a href="{% url 'payments:list' %}#payments-table" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">
+        Cancel
+      </a>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}

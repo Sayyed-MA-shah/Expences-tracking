@@ -68,6 +68,7 @@ class SalaryPayment(models.Model):
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(default=timezone.now)
+    description = models.TextField(blank=True, null=True)  # ✅ new field
 
     def save(self, *args, **kwargs):
         # Check balance before saving
@@ -152,10 +153,39 @@ class FixedSalaryPayment(models.Model):
     employee = models.ForeignKey(
         FixedEmployee,
         on_delete=models.CASCADE,
-        related_name="fixed_payments"  # 👈 important
+        related_name="fixed_payments"
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(default=timezone.now)
+    description = models.TextField(blank=True, default="")  # ← NEW
 
     def __str__(self):
         return f"{self.employee.name} - {self.amount} on {self.date}"
+
+class FixedWorkCredit(models.Model):
+    """
+    Extra work/overtime credited to a fixed employee.
+    If both hours and rate are provided, amount is auto-computed.
+    Otherwise, you can enter amount directly.
+    """
+    employee = models.ForeignKey(
+        'FixedEmployee',
+        on_delete=models.CASCADE,
+        related_name='work_credits'
+    )
+    date = models.DateField(default=timezone.now)
+    hours = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    rate  = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(blank=True, default="")
+
+    class Meta:
+        ordering = ['-date', '-id']
+
+    def __str__(self):
+        return f"{self.employee} • {self.date} • +{self.amount}"
+
+    def clean(self):
+        # Compute amount if not set but hours & rate exist
+        if (self.amount is None or self.amount == 0) and self.hours and self.rate:
+            self.amount = (self.hours * self.rate).quantize(Decimal('0.01'))

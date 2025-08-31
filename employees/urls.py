@@ -22,9 +22,11 @@ urlpatterns = [
      path("<int:emp_id>/add_salary/", views.add_salary, name="add_salary"),
      path("<int:pk>/report/", views.employee_report, name="report"),
 
-     path("<int:pk>/work/<int:record_id>/delete/", views.delete_work_record, name="delete_work_record"),
-     path("<int:pk>/salary/<int:payment_id>/delete/", views.delete_salary_payment, name="delete_salary_payment"),
+     
      path("<int:pk>/advance/<int:advance_id>/delete/", views.delete_advance_payment, name="delete_advance_payment"),
+     path("<int:pk>/work/<int:record_id>/delete/", views.delete_work_record, name="delete_work_record"),
+    path("<int:pk>/salary/<int:payment_id>/delete/", views.delete_salary_payment, name="delete_salary_payment"),
+     
 
      path("fixed/", views.fixed_employee_list, name="fixed_employee_list"),
      path("fixed/add/", views.fixed_employee_create, name="fixed_employee_create"),
@@ -32,7 +34,7 @@ urlpatterns = [
      path("fixed/<int:employee_id>/add-salary/", views.fixed_employee_add_salary, name="fixed_employee_add_salary"),
      path("fixed/<int:pk>/delete/", views.fixed_employee_delete, name="fixed_employee_delete"),
      path("fixed/<int:pk>/edit/", views.fixed_employee_update, name="fixed_employee_update"),
-     
+     path("fixed/<int:employee_id>/work/new/", views.fixed_employee_add_work, name="fixed_employee_add_work"),
     #  fixed amployee payslip
     path("fixed/<int:pk>/payslip/", views.fixed_employee_payslip, name="fixed_employee_payslip"),
 

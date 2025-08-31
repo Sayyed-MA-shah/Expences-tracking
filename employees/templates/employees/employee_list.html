@@ -30,6 +30,10 @@
       £{{ advances_negative_total|floatformat:2 }}
     </p>
   </div>
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm">Advance</h4>
+    <p class="text-2xl font-bold text-yellow-600 mt-2">£{{ employee.salary_total_all }}</p>
+  </div>
 </div>
 
   
@@ -99,7 +103,7 @@
           <td class="p-2">{{ emp.phone }}</td>
           <td class="p-2">{{ emp.role }}</td>
           <td class="p-2">£{{ emp.total_earned }}</td>
-          <td class="p-2">£{{ emp.total_advances }}</td>
+          <td class="p-2">£{{ emp.total_salary_paid }}</td>
           <td class="p-2 font-semibold {% if emp.balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">£{{ emp.balance }}</td>
           <td class="p-2 space-x-2">
             <a href="{% url 'employees:update' emp.id %}" class="px-3 py-1 bg-gray-600 text-white rounded-lg text-sm">✏</a>

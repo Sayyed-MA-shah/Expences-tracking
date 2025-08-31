@@ -2,36 +2,70 @@
 {% block title %}New Payment - WINSIDE{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-md">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">💳 Add New Payment</h1>
-    
-    <form method="post" class="space-y-5">
-        {% csrf_token %}
-        
-        <!-- Django form rendered with better styling -->
-        <div class="space-y-4">
-            {{ form.non_field_errors }}
-            {% for field in form %}
-                <div>
-                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ field.label }}
-                    </label>
-                    <div class="w-full">
-                        {{ field }}
-                    </div>
-                    {% if field.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ field.errors|join:", " }}</p>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        </div>
+<style>
+  /* Minimal, component-scoped styles */
+  .styled-form .form-field label{
+    display:block; font-size:.875rem; font-weight:500; color:#374151; margin-bottom:.25rem;
+  }
+  .styled-form :is(input:not([type=checkbox]):not([type=radio]), select, textarea){
+    width:100%; padding:.65rem .75rem; border:1px solid #e5e7eb; border-radius:.75rem;
+    background:#fff; color:#111827; box-shadow:0 1px 1px rgba(0,0,0,.02);
+    transition:border-color .2s, box-shadow .2s, background .2s;
+  }
+  .styled-form :is(input:not([type=checkbox]):not([type=radio]), select, textarea):focus{
+    outline:none; border-color:#2563eb; box-shadow:0 0 0 4px rgba(37,99,235,.15);
+  }
+  .styled-form textarea{ min-height:120px; resize:vertical; }
+  .styled-form .help{ margin-top:.25rem; font-size:.75rem; color:#6b7280; }
+  .styled-form .error{ margin-top:.25rem; font-size:.75rem; color:#dc2626; }
+  .styled-form .nonfield{
+    border:1px solid #fecaca; background:#fef2f2; color:#b91c1c;
+    padding:.75rem .875rem; border-radius:.75rem; font-size:.875rem; margin-bottom:1rem;
+  }
+  .styled-form .field-error :is(input, select, textarea){
+    border-color:#ef4444;
+    box-shadow:0 0 0 4px rgba(239,68,68,.08);
+  }
+</style>
 
-        <div class="flex justify-end">
-            <button type="submit" 
-                class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition">
-                💾 Save Payment
-            </button>
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-md styled-form">
+  <h1 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">💳 Add New Payment</h1>
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="nonfield">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      {% for field in form %}
+        <div class="form-field {% if field.errors %}field-error{% endif %} {% if field.field.widget.input_type == 'checkbox' or field.field.widget.input_type == 'radio' %}sm:col-span-2{% endif %}">
+          <label for="{{ field.id_for_label }}">
+            {{ field.label }}
+          </label>
+
+          <div>
+            {{ field }}
+          </div>
+
+          {% if field.help_text %}
+            <p class="help">{{ field.help_text }}</p>
+          {% endif %}
+
+          {% if field.errors %}
+            <p class="error">{{ field.errors|join:", " }}</p>
+          {% endif %}
         </div>
-    </form>
+      {% endfor %}
+    </div>
+
+    <div class="flex justify-end">
+      <button type="submit"
+        class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition">
+        💾 Save Payment
+      </button>
+    </div>
+  </form>
 </div>
 {% endblock %}

@@ -39,6 +39,10 @@
     <p class="text-2xl font-bold text-yellow-600 mt-2">£{{ employee.total_advances }}</p>
   </div>
   <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm">Advance</h4>
+    <p class="text-2xl font-bold text-yellow-600 mt-2">£{{ employee.salary_total_all }}</p>
+  </div>
+  <div class="bg-white shadow rounded-xl p-6 text-center">
     <h4 class="text-gray-500 text-sm">Balance</h4>
     <p class="text-2xl font-bold {% if employee.balance < 0 %}text-red-600{% else %}text-green-600{% endif %} mt-2">
       £{{ employee.balance }}
@@ -84,12 +88,16 @@
   <h3 class="text-lg font-semibold mb-2">💷 Salary Payments</h3>
   <table class="w-full border mb-6">
     <thead class="bg-gray-100">
-      <tr><th class="p-2">Date</th><th class="p-2">Amount</th></tr>
+      <tr>
+        <th class="p-2">Date</th>
+        <th class="p-2">Amount</th>
+      </tr>
     </thead>
     <tbody>
       {% for sp in salary_payments %}
       <tr class="border-t">
         <td class="p-2">{{ sp.date }}</td>
+        
         <td class="p-2 text-right">£{{ sp.amount }}</td>
       </tr>
       {% empty %}
@@ -98,7 +106,10 @@
       <tr class="bg-gray-50 font-bold">
         <td class="p-2 text-right">Total</td>
         <td class="p-2 text-right">£{{ total_salary }}</td>
-        
+       </tr>
+       <tr class="bg-gray-50 font-bold">
+        <td colspan="4" class="p-2 text-right">Total</td>
+        <td class="p-2 text-right">£{{ total_work|floatformat:2 }}</td>
       </tr>
     </tbody>
   </table>

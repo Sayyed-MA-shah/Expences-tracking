@@ -13,6 +13,7 @@
     <h4 class="text-gray-500 text-sm">Salary Paid</h4>
     <p class="text-2xl font-bold text-blue-600 mt-2">£{{ employee.total_salary_paid }}</p>
   </div>
+  
   <!-- <div class="bg-white shadow rounded-xl p-6 text-center">
     <h4 class="text-gray-500 text-sm">Advance</h4>
     <p class="text-2xl font-bold text-yellow-600 mt-2">£{{ employee.total_advances }}</p>
@@ -49,10 +50,12 @@
 <!-- ====== Employee Summary ====== -->
 
 <!-- ====== Work Records ====== -->
+  <section id="work_records">
 <div class="bg-white shadow rounded-xl mb-8 overflow-x-auto">
   <div class="border-b px-6 py-3 ">
     <h2 class="text-lg font-semibold">🛠 Work Records</h2>
   </div>
+ 
   <table class="w-full text-sm">
     <thead class="bg-gray-100">
       <tr>
@@ -74,8 +77,9 @@
         <td class="p-2 text-right">£{{ w.total }}</td>
         <td class="p-2 text-center no-print">
         <a href="{% url 'employees:delete_work_record' employee.id w.id %}"
-           class="text-red-600 hover:underline no-print"
-           onclick="return confirm('Delete this advance payment?')">🗑 Delete</a>
+           class="px-3 py-1 bg-red-400 text-white rounded-lg text-sm"
+           >🗑</a>
+           
       </td>
       </tr>
       {% empty %}
@@ -87,17 +91,21 @@
       </tr>
     </tbody>
   </table>
+ 
 </div>
-
+ </section>
 <!-- ====== Salary Payments ====== -->
+ <section id="salary_payments" class="mb-8">
 <div class="bg-white shadow rounded-xl mb-8 overflow-x-auto">
   <div class="border-b px-6 py-3 page-break">
     <h2 class="text-lg font-semibold">💷 Salary Payments</h2>
   </div>
+  
   <table class="w-full text-sm">
     <thead class="bg-gray-100">
       <tr>
         <th class="p-2 text-left">Date</th>
+        <th class="p-2 text-left">Description</th>
         <th class="p-2 text-right">Amount</th>
         <th class="p-2 no-print">Actions</th>
       </tr>
@@ -106,23 +114,26 @@
       {% for sp in salary_payments %}
       <tr class="border-t">
         <td class="p-2">{{ sp.date }}</td>
+        <td class="p-2">{{sp.description}}</td>
         <td class="p-2 text-right">£{{ sp.amount }}</td>
         <td class="p-2 text-center no-print">
         <a href="{% url 'employees:delete_salary_payment' employee.id sp.id %}"
-           class="text-red-600 hover:underline no-print"
-           onclick="return confirm('Delete this salary payment?')">🗑 Delete</a>
+           class="px-3 py-1 bg-red-400 text-white rounded-lg text-sm"
+           >🗑</a>
       </td>
       </tr>
       {% empty %}
       <tr><td colspan="2" class="p-2 text-center text-gray-500">No salary payments found.</td></tr>
       {% endfor %}
-      <tr class="bg-gray-50 font-bold">
-        <td class="p-2 text-right">Total</td>
-        <td class="p-2 text-right">£{{ total_salary }}</td>
+      <tr class="bg-gray-50 font-bold ">
+        <td colspan="2" class="p-2 text-right">Total</td>
+        <td class="p-4 text-right">£{{ total_salary }}</td>
       </tr>
     </tbody>
   </table>
+  
 </div>
+</section>
 
 <!-- ====== Advance Payments ======
 <div class="bg-white shadow rounded-xl mb-8 overflow-x-auto">

@@ -20,35 +20,44 @@
   <form method="post" class="space-y-5">
     {% csrf_token %}
 
+    <!-- Date -->
+    <div>
+      <label for="{{ form.date.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-1">
+        Payment Date
+      </label>
+      {{ form.date }}
+      {% if form.date.errors %}
+        <p class="text-red-600 text-sm mt-1">{{ form.date.errors.0 }}</p>
+      {% endif %}
+    </div>
+
     <!-- Amount -->
     <div>
-      <label class="block text-sm font-semibold text-gray-700 mb-1">
+      <label for="{{ form.amount.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-1">
         Amount (£)
       </label>
       <div class="relative">
         <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">£</span>
-        <input type="number" name="amount" step="0.01" min="0"
-               value="{{ form.amount.value|default_if_none:'' }}"
-               placeholder="Enter amount e.g. 1200.00"
-               class="w-full border rounded-lg pl-8 pr-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500">
+        {{ form.amount }}
       </div>
       {% if form.amount.errors %}
         <p class="text-red-600 text-sm mt-1">{{ form.amount.errors.0 }}</p>
       {% endif %}
     </div>
 
-    <!-- Date -->
-    <div>
-      <label class="block text-sm font-semibold text-gray-700 mb-1">
-        Payment Date
-      </label>
-      <input type="date" name="date"
-             value="{{ form.date.value|default:'' }}"
-             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500">
-      {% if form.date.errors %}
-        <p class="text-red-600 text-sm mt-1">{{ form.date.errors.0 }}</p>
-      {% endif %}
-    </div>
+    <!-- Description -->
+    <!-- Description -->
+<div>
+  <label for="{{ form.description.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-1">
+    Description (optional)
+  </label>
+  {{ form.description }}
+  <p class="text-xs text-gray-500 mt-1">Add any notes about this payment (e.g. month covered, bonus, deduction).</p>
+  {% if form.description.errors %}
+    <p class="text-red-600 text-sm mt-1">{{ form.description.errors.0 }}</p>
+  {% endif %}
+</div>
+
 
     <!-- Submit -->
     <div class="pt-2">
@@ -57,13 +66,13 @@
         💾 Save Payment
       </button>
     </div>
-  </form>
 
-  {% if form.non_field_errors %}
-  <div class="bg-red-50 text-red-700 p-3 rounded-lg">
-    {{ form.non_field_errors }}
-  </div>
-  {% endif %}
+    {% if form.non_field_errors %}
+      <div class="bg-red-50 text-red-700 p-3 rounded-lg">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+  </form>
 
 </div>
 

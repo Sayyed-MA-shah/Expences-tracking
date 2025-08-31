@@ -17,15 +17,34 @@
          class="px-4 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">
          🧾 Payslip
       </a>
+      <a href="{% url 'employees:fixed_employee_add_work' employee.id %}"
+   class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
+  🛠 Log Work
+</a>
+
     </div>
   </div>
 
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm">Total Salary</h4>
+    <p class="text-2xl font-bold text-green-600 mt-2">PKR {{ total_salary }}</p>
+  </div>
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm">Salary Paid</h4>
+    <p class="text-2xl font-bold text-blue-600 mt-2">PKR {{ total_paid }}</p>
+  </div>
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <h4 class="text-gray-500 text-sm">Balance</h4>
+    <p class="text-2xl font-bold {% if balance < 0 %}text-red-600{% else %}text-green-600{% endif %} mt-2">
+      PKR {{ balance  }}
+    </p>
+  </div>
+</div>
   <!-- Employee Info -->
   <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
     <p><strong>📞 Phone:</strong> {{ employee.phone }}</p>
     <p><strong>👔 Role:</strong> {{ employee.role }}</p>
-    <p><strong>💰 Monthly Salary:</strong> £{{ total_salary }}</p>
-    <p><strong>🧾 Total Paid:</strong> £{{ total_paid }}</p>
   </div>
 
   <!-- Date Filter -->
@@ -52,7 +71,9 @@
       <thead class="bg-gray-200 text-gray-700">
         <tr>
           <th class="p-2 text-left">Date</th>
+          <th class="p-2 text-left">Description</th>
           <th class="p-2 text-left">Amount Paid</th>
+          
           <th class="p-1text-left">Action</th>
         </tr>
       </thead>
@@ -60,8 +81,9 @@
         {% for payment in payments %}
         <tr class="hover:bg-gray-50">
           <td class="p-2">{{ payment.date }}</td>
+           <td class="p-2">{{ payment.description }}</td>
           <td class="p-2 font-semibold text-green-700">£{{ payment.amount }}</td>
-          
+        
         </tr>
         {% empty %}
         <tr><td colspan="2" class="p-2 text-center text-gray-500">No payments found.</td></tr>

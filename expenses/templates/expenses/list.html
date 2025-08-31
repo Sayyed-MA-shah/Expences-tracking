@@ -4,72 +4,114 @@
 {% block content %}
 <h1 class="text-2xl font-semibold mb-6">Daily Expenses</h1>
 
-<!-- ===== Summary Cards ===== -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+<!-- ===== Summary Cards (dynamic) ===== -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
   <div class="bg-white shadow rounded-xl p-6 text-center">
-    <h4 class="text-gray-500 text-sm font-medium">Total (All)</h4>
-    <p class="text-2xl font-bold text-blue-600 mt-2">{{ total_all|floatformat:0 }}</p>
+    <h3 class="text-black text-sm font-bold">Total (All)</h3>
+    <p class="text-4xl font-bold text-blue-600 mt-2">{{ total_all|floatformat:0 }}</p>
   </div>
+
+  {% for c in summary_cards %}
   <div class="bg-white shadow rounded-xl p-6 text-center">
-    <h4 class="text-gray-500 text-sm font-medium">Material</h4>
-    <p class="text-2xl font-bold text-green-600 mt-2">{{ total_material|floatformat:0 }}</p>
+    <h4 class="text-gray-500 text-sm font-medium">{{ c.label }}</h4>
+    <p class="text-2xl font-bold {{ c.color }} mt-2">{{ c.value|floatformat:0 }}</p>
   </div>
-  <div class="bg-white shadow rounded-xl p-6 text-center">
-    <h4 class="text-gray-500 text-sm font-medium">Rent/Bill/Guest</h4>
-    <p class="text-2xl font-bold text-yellow-600 mt-2">{{ total_rbg|floatformat:0 }}</p>
-  </div>
-  <div class="bg-white shadow rounded-xl p-6 text-center">
-    <h4 class="text-gray-500 text-sm font-medium">Setup Purchase</h4>
-    <p class="text-2xl font-bold text-red-600 mt-2">{{ total_setup|floatformat:0 }}</p>
-  </div>
+  {% endfor %}
 </div>
 
-<!-- ===== Filters + Add Button ===== -->
-<div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+<!-- ===== Filters + Actions ===== -->
+<div class="flex flex-wrap items-center justify-between mb-4 gap-4">
   <form method="get" class="flex flex-wrap items-end gap-4">
     <div>
       <label class="text-sm text-gray-600">From</label>
       <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}"
-        class="border rounded-lg p-2 mt-1 block w-40 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        class="border rounded-lg p-2 mt-1 block w-44 border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
     </div>
     <div>
       <label class="text-sm text-gray-600">To</label>
       <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}"
-        class="border rounded-lg p-2 mt-1 block w-40 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        class="border rounded-lg p-2 mt-1 block w-44 border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
     </div>
     <div>
       <label class="text-sm text-gray-600">Category</label>
       <select name="category"
-        class="border rounded-lg p-2 mt-1 block w-48 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        class="border rounded-lg p-2 mt-1 block w-56 border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
         <option value="">-- All --</option>
         {% for code,label in categories %}
-        <option value="{{ code }}" {% if category == code %}selected{% endif %}>{{ label }}</option>
+          <option value="{{ code }}" {% if category == code %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
     </div>
+
+    <!-- keep the active tab when filtering -->
+    <input type="hidden" name="tab" value="{{ active_tab|default:'all' }}">
+
     <div>
-      <button type="submit"
-        class="px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
+      <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
         Apply Filter
       </button>
     </div>
-    <hr><hr><hr>
-    <a href="{% url 'expenses:report' %}"
-   class="px-5 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">
-   📄 Generate Report
-</a>
-  <a href="{% url 'expenses:bulk_add' %}"
-    class="px-5 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">
-    + Add Expense
-  </a>
+
+    <a href="{% url 'expenses:report' %}" class="px-5 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">
+      📄 Generate Report
+    </a>
+    <a href="{% url 'expenses:bulk_add' %}" class="px-5 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">
+      + Add Expense
+    </a>
   </form>
-  
-  <br>
-  
 </div>
 
+<!-- ===== Category Tabs (preserve dates) ===== -->
+<div class="mt-2">
+  <nav class="flex flex-wrap gap-2" role="tablist">
+    <a href="{% url 'expenses:list' %}?tab=all&start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}"
+       aria-current="{% if active_tab == 'all' %}page{% else %}false{% endif %}"
+       class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition
+              {% if active_tab == 'all' %}bg-blue-600 text-white shadow{% else %}text-gray-700 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+      🗂️ <span>All</span>
+      <span class="ml-1 text-[11px] rounded-full px-2 py-0.5 {% if active_tab == 'all' %}bg-white/20 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+        {{ count_all }}
+      </span>
+    </a>
+
+    {% for t in tab_defs %}
+    <a href="{% url 'expenses:list' %}?tab={{ t.key }}&start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}"
+       aria-current="{% if active_tab == t.key %}page{% else %}false{% endif %}"
+       class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition
+              {% if active_tab == t.key %}bg-blue-600 text-white shadow{% else %}text-gray-700 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+      {% if t.key == 'material' %}🧱{% elif t.key == 'rbg' %}🏠{% elif t.key == 'setup' %}🧰{% elif t.key == 'logistics' %}🚚{% elif t.key == 'outsource' %}🤝{% else %}🏷️{% endif %}
+      <span>{{ t.label }}</span>
+      <span class="ml-1 text-[11px] rounded-full px-2 py-0.5 {% if active_tab == t.key %}bg-white/20 text-white{% else %}bg-gray-100 text-gray-700{% endif %}">
+      {% with k=t.key %}
+        {{ counts_by_cat.k }}
+      {% endwith %}
+
+      </span>
+    </a>
+    {% endfor %}
+  </nav>
+</div>
+
+<!-- Optional visible subtotal -->
+<p class="mt-3 text-sm text-gray-600">
+  Showing <strong>
+    {% if active_tab == 'all' %}
+      All
+    {% else %}
+      {% for t in tab_defs %}
+        {% if t.key == active_tab %}
+          {{ t.label }}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </strong>
+  for <span class="font-medium">{{ start_date|date:'Y-m-d' }} → {{ end_date|date:'Y-m-d' }}</span>:
+  PKR {{ visible_total|floatformat:0 }}
+</p>
+
+
 <!-- ===== Table ===== -->
-<div class="overflow-x-auto bg-white rounded-xl shadow">
+<div id="expenses-table" class="overflow-x-auto bg-white rounded-xl shadow mt-3">
   <table class="w-full border-collapse">
     <thead class="bg-gray-100 text-gray-600 text-sm">
       <tr>
@@ -77,7 +119,7 @@
         <th class="px-4 py-3 text-left">Category</th>
         <th class="px-4 py-3 text-left">Description</th>
         <th class="px-4 py-3 text-right">Amount</th>
-        <th class="px-4 py-3 text-center">Actions</th> 
+        <th class="px-4 py-3 text-center">Actions</th>
       </tr>
     </thead>
     <tbody class="text-sm text-gray-700">
@@ -85,27 +127,21 @@
       <tr class="border-t hover:bg-gray-50">
         <td class="px-4 py-2">{{ exp.date }}</td>
         <td class="px-4 py-2">{{ exp.get_category_display }}</td>
-        <td class="px-4 py-2">{{ exp.description }}</td>
-        <td class="px-4 py-2 text-right">{{ exp.amount }}</td>
-         <td class="px-4 py-2 text-center">
-      <a href="{% url 'expenses:delete' exp.id %}"
-         class="px-3 py-1 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 text-sm">
-         🗑 
-      </a>
-    </td>
-    
-   
-  
+        <td class="px-4 py-2">{{ exp.description|default:"—" }}</td>
+        <td class="px-4 py-2 text-right">PKR {{ exp.amount|floatformat:0 }}</td>
+        <td class="px-4 py-2 text-center">
+          <a href="{% url 'expenses:delete' exp.id %}?return={{ request.get_full_path|urlencode }}"
+             class="px-3 py-1 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 text-sm">
+            🗑
+          </a>
+        </td>
+      </tr>
       {% empty %}
-      
       <tr>
         <td colspan="5" class="px-4 py-6 text-center text-gray-400">No expenses found</td>
       </tr>
       {% endfor %}
     </tbody>
-    
   </table>
-  
 </div>
-
 {% endblock %}

@@ -52,6 +52,10 @@ class HomeView(LoginRequiredMixin, TemplateView):
                .aggregate(total=Sum('amount'))['total'] or Decimal("0"))
             + (Expense.objects.filter(date__range=[month_start, today], category=Expense.Category.SETUP)
                .aggregate(total=Sum('amount'))['total'] or Decimal("0"))
+            + (Expense.objects.filter(date__range=[month_start, today], category=Expense.Category.LOGISTICS)
+               .aggregate(total=Sum('amount'))['total'] or Decimal("0"))
+            + (Expense.objects.filter(date__range=[month_start, today], category=Expense.Category.OUTSOURCE)
+               .aggregate(total=Sum('amount'))['total'] or Decimal("0"))
             + temp_salary_paid_month
             + fixed_salary_paid_month
         )

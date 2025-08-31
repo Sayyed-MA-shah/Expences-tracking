@@ -1,142 +1,80 @@
 {% extends "base.html" %}
-{% block title %}Add Multiple Expenses{% endblock %}
-
 {% block content %}
-<h1 class="text-2xl font-semibold mb-6">Add Multiple Expenses</h1>
+<div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow">
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <h2 class="text-xl font-semibold mb-4">💸 Add Expenses</h2>
 
-<!-- Feedback messages -->
-{% if messages %}
-  {% for message in messages %}
-    <div class="mb-4 p-2 rounded 
-      {% if message.tags == 'success' %}
-        bg-green-100 text-green-700
-      {% elif message.tags == 'error' or message.tags == 'danger' %}
-        bg-red-100 text-red-700
-      {% elif message.tags == 'warning' %}
-        bg-yellow-100 text-yellow-700
-      {% else %}
-        bg-blue-100 text-blue-700
-      {% endif %}
-    ">
-      {{ message }}
+    <table class="w-full border rounded-lg" id="expenseTable">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="p-2">Date</th>
+          <th class="p-2">Category</th>
+          <th class="p-2">Amount (£)</th>
+          <th class="p-2">Description</th>
+          <th class="p-2">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="p-2">
+            <input type="date" name="date[]" value="{{ today }}" class="border p-2 rounded w-full">
+          </td>
+          <td class="p-2">
+            <select name="category[]" class="border p-2 rounded w-full">
+              <option value="">-- Select --</option>
+              <option value="MATERIAL">Material Expense</option>
+              <option value="RBG">Rent / Bill / Guest</option>
+              <option value="SETUP">Setup Purchase</option>
+              <option value="OUTSOURCE">Outsource</option>
+              <option value="LOGISTICS">Logistics</option>
+            </select>
+          </td>
+          <td class="p-2">
+            <input type="number" step="0.01" name="amount[]" class="border p-2 rounded w-full" required>
+          </td>
+          <td class="p-2">
+            <input type="text" name="description[]" placeholder="Optional details" class="border p-2 rounded w-full">
+          </td>
+          <td class="p-2 text-center">
+            <button type="button" onclick="removeRow(this)" class="px-3 py-1 bg-red-500 text-white rounded">✖</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="flex justify-between mt-4">
+      <button type="button" onclick="addRow()" class="px-4 py-2 bg-blue-600 text-white rounded">➕ Add Row</button>
+      <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded">✅ Save Records</button>
     </div>
-  {% endfor %}
-{% endif %}
-
-<form method="post">
-  {% csrf_token %}
-
-  <table class="w-full border-collapse">
-    <thead>
-      <tr class="bg-gray-100">
-        <th class="p-2">Date</th>
-        <th class="p-2">Category</th>
-        <th class="p-2">Sub Type (RBG)</th>
-        <th class="p-2">Amount</th>
-        <th class="p-2">Description</th>
-        <th class="p-2">Remove</th>
-      </tr>
-    </thead>
-
-    <tbody id="expense-rows">
-      <tr>
-        <td>
-          <input type="date" name="date[]" value="{{ today }}" class="border rounded p-1 w-full">
-        </td>
-        <td>
-          <select name="category[]" class="border rounded p-1 w-full category-select" onchange="toggleSubType(this)">
-            <option value="">-- Select --</option>
-            <option value="MATERIAL">Material Expense</option>
-            <option value="RBG">Rent / Bill / Guest</option>
-            <option value="SETUP">Setup Purchase</option>
-            <option value="OUTSOURCE">Outsource</option>
-            <option value="LOGISTICS">Logistics</option>
-          </select>
-        </td>
-        <td>
-          <select name="sub_type[]" class="border rounded p-1 w-full sub-type-select" style="display:none;">
-            <option value="">-- Select --</option>
-            <option value="RENT">Rent</option>
-            <option value="BILL">Bill</option>
-            <option value="GUEST">Guest</option>
-          </select>
-        </td>
-        <td>
-          <input type="number" step="0.01" name="amount[]" class="border rounded p-1 w-full">
-        </td>
-        <td>
-          <input type="text" name="description[]" class="border rounded p-1 w-full">
-        </td>
-        <td>
-          <button type="button" onclick="deleteRow(this)" class="text-red-600 font-bold">❌</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="flex gap-4 mt-4">
-    <button type="button" onclick="addRow()" class="px-4 py-2 bg-gray-600 text-white rounded">+ Add Row</button>
-    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">💾 Save All</button>
-  </div>
-</form>
+  </form>
+</div>
 
 <script>
-function toggleSubType(select) {
-  const row = select.closest("tr");
-  const subType = row.querySelector(".sub-type-select");
-  if (select.value === "RBG") {
-    subType.style.display = "block";
-  } else {
-    subType.style.display = "none";
-    subType.value = ""; // reset for non-RBG
-  }
-}
-
 function addRow() {
-  const tbody = document.getElementById("expense-rows");
-  const newRow = document.createElement("tr");
+  const tbody = document.getElementById("expenseTable").getElementsByTagName("tbody")[0];
+  const newRow = tbody.rows[0].cloneNode(true);
 
-  newRow.innerHTML = `
-    <td>
-      <input type="date" name="date[]" value="{{ today }}" class="border rounded p-1 w-full">
-    </td>
-    <td>
-      <select name="category[]" class="border rounded p-1 w-full category-select" onchange="toggleSubType(this)">
-        <option value="">-- Select --</option>
-        <option value="MATERIAL">Material Expense</option>
-        <option value="RBG">Rent / Bill / Guest</option>
-        <option value="SETUP">Setup Purchase</option>
-        <option value="OUTSOURCE">Outsource</option>
-        <option value="LOGISTICS">Logistics</option>
-      </select>
-    </td>
-    <td>
-      <select name="sub_type[]" class="border rounded p-1 w-full sub-type-select" style="display:none;">
-        <option value="">-- Select --</option>
-        <option value="RENT">Rent</option>
-        <option value="BILL">Bill</option>
-        <option value="GUEST">Guest</option>
-      </select>
-    </td>
-    <td>
-      <input type="number" step="0.01" name="amount[]" class="border rounded p-1 w-full">
-    </td>
-    <td>
-      <input type="text" name="description[]" class="border rounded p-1 w-full">
-    </td>
-    <td>
-      <button type="button" onclick="deleteRow(this)" class="text-red-600 font-bold">❌</button>
-    </td>
-  `;
+  // clear inputs/selects in the cloned row
+  newRow.querySelectorAll("input, select").forEach(el => {
+    if (el.tagName === "SELECT") {
+      el.selectedIndex = 0;
+    } else {
+      el.value = "";
+    }
+  });
 
   tbody.appendChild(newRow);
 }
 
-function deleteRow(button) {
-  button.closest("tr").remove();
+function removeRow(btn) {
+  const row = btn.closest("tr");
+  const tbody = document.getElementById("expenseTable").getElementsByTagName("tbody")[0];
+  if (tbody.rows.length > 1) {
+    row.remove();
+  } else {
+    alert("At least one row is required.");
+  }
 }
-
-// Initialize the first row's subtype visibility (if category preselected)
-document.querySelectorAll(".category-select").forEach(toggleSubType);
 </script>
 {% endblock %}

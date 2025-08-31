@@ -8,13 +8,15 @@ from decimal import Decimal
 from django.utils.timezone import now
 from django.urls import reverse
 from datetime import datetime
-from .models import ContractualEmployee, WorkRecord, SalaryPayment, FixedEmployee, FixedSalaryPayment, AdvancePayment
+from .models import ContractualEmployee, WorkRecord, SalaryPayment, FixedEmployee, FixedSalaryPayment, AdvancePayment, FixedWorkCredit
 from django import forms
+from django.contrib import messages
 from .forms import (
     ContractualEmployeeForm,
     WorkRecordForm,
     FixedEmployeeForm,
     FixedSalaryPaymentForm,
+    FixedWorkCreditForm,
 )
 
 # Show all employees with totals
@@ -189,29 +191,30 @@ def payslip(request, employee_id):
 
 
 # --- Salary Payment Form ---
-class SalaryPaymentForm(forms.ModelForm):
-    amount = forms.DecimalField(
-        label="Amount (£)",
-        min_value=0,
-        decimal_places=2,
-        widget=forms.NumberInput(attrs={
-            "class": "w-full border rounded-lg p-3 focus:ring-2 focus:ring-green-500",
-            "placeholder": "Enter salary amount",
-            "step": "0.01"
-        })
-    )
+from django import forms
+from .models import SalaryPayment
 
-    date = forms.DateField(
-        label="Date",
-        initial=timezone.now().date,
-        widget=forms.DateInput(attrs={
-            "type": "date",
-            "class": "w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
-        })
-    )
+class SalaryPaymentForm(forms.ModelForm):
     class Meta:
         model = SalaryPayment
-        fields = ["amount", "date"]
+        fields = ["amount", "date", "description"]
+        widgets = {
+            "amount": forms.NumberInput(attrs={
+                "class": "w-full border rounded-lg p-3",
+                "step": "0.01",
+                "placeholder": "Enter amount"
+            }),
+            "date": forms.DateInput(attrs={
+                "class": "w-full border rounded-lg p-3",
+                "type": "date"
+            }),
+            "description": forms.Textarea(attrs={
+                "class": "w-full border rounded-lg p-3",
+                "rows": 3,
+                "placeholder": "Optional notes for this payment"
+            }),
+        }
+
 
 
 # Add Salary (handles auto-advance if overpaid)
@@ -225,7 +228,7 @@ def add_salary(request, emp_id):
             salary_payment.employee = employee
             salary_payment.save()
             print("Salary saved:", salary_payment.amount)
-            return redirect("employees:list")
+            return redirect("employees:detail", employee.id)
     else:
         form = SalaryPaymentForm()
 
@@ -277,16 +280,44 @@ def employee_report(request, pk):
 
 def delete_work_record(request, pk, record_id):
     employee = get_object_or_404(ContractualEmployee, pk=pk)
-    record = get_object_or_404(WorkRecord, id=record_id, employee=employee)
-    record.delete()
-    return redirect(reverse("employees:report", args=[employee.id]))
+    # Get by id only, then verify ownership to avoid false 404s
+    record = get_object_or_404(WorkRecord, id=record_id)
+
+    # If the record doesn't belong to this employee, show an error instead of hard 404
+    if getattr(record, "employee_id", None) != employee.id:
+        messages.error(request, "That work record doesn’t belong to this employee.")
+        return redirect(reverse("employees:report", args=[employee.id]) + "#work-records")
+
+    if request.method == "POST":
+        record.delete()
+        messages.success(request, "Work record deleted.")
+        return redirect(reverse("employees:report", args=[employee.id]) + "#work-records")
+
+    # GET: confirmation page
+    return render(request, "employees/confirm_delete_work_record.html", {
+        "employee": employee,
+        "record": record,
+    })
+
 
 # DELETE Salary Payment
 def delete_salary_payment(request, pk, payment_id):
     employee = get_object_or_404(ContractualEmployee, pk=pk)
-    payment = get_object_or_404(SalaryPayment, id=payment_id, employee=employee)
-    payment.delete()
-    return redirect(reverse("employees:report", args=[employee.id]))
+    payment = get_object_or_404(SalaryPayment, id=payment_id)
+
+    if getattr(payment, "employee_id", None) != employee.id:
+        messages.error(request, "That salary payment doesn’t belong to this employee.")
+        return redirect(reverse("employees:report", args=[employee.id]) + "#salary-payments")
+
+    if request.method == "POST":
+        payment.delete()
+        messages.success(request, "Salary payment deleted.")
+        return redirect(reverse("employees:report", args=[employee.id]) + "#salary-payments")
+
+    return render(request, "employees/confirm_delete_salary_payment.html", {
+        "employee": employee,
+        "payment": payment,
+    })
 
 
 
@@ -414,4 +445,23 @@ def fixed_employee_payslip(request, pk):
         "balance": balance,
         "start_date": start_date,
         "end_date": end_date,
+    })
+
+def fixed_employee_add_work(request, employee_id):
+    employee = get_object_or_404(FixedEmployee, id=employee_id)
+
+    if request.method == "POST":
+        form = FixedWorkCreditForm(request.POST)
+        if form.is_valid():
+            credit = form.save(commit=False)
+            credit.employee = employee
+            credit.save()
+            messages.success(request, "Work credit added ✅")
+            return redirect("employees:fixed_employee_report", pk=employee.id)
+    else:
+        form = FixedWorkCreditForm()
+
+    return render(request, "employees/fixed_employee_add_work.html", {
+        "form": form,
+        "employee": employee,
     })

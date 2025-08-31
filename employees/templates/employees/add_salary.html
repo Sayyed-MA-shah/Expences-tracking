@@ -6,11 +6,9 @@
 <div class="bg-white shadow rounded-xl p-6 max-w-lg mx-auto">
   <form method="post" class="space-y-5">
     {% csrf_token %}
-
-    <!-- Amount Field -->
-    <div>
+ <div>
       <div class="flex items-center justify-between">
-      <label class="block text-sm font-medium text-gray-700 mb-1"> 💵 Amount (£)</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1"> 💵 Amount (PKR)</label>
       <a href="{% url 'employees:detail' employee.id %}"
        class="text-sm px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700">
        ← Back to Report
@@ -18,7 +16,27 @@
       </div><br>
       <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
     Adding payment for: <strong>{{ employee.name }}</strong>
+    </div><br><br>
+    <!-- Date Field -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
+      {{ form.date }}
+      {% if form.date.errors %}
+        <p class="text-red-600 text-sm mt-1">{{ form.date.errors.0 }}</p>
+      {% endif %}
     </div><br>
+
+    <!-- Description Field -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">📝 Description</label>
+      {{ form.description }}
+      <!-- <p class="text-xs text-gray-500 mt-1">Optional. E.g., “Partial payment for August”.</p> -->
+      {% if form.description.errors %}
+        <p class="text-red-600 text-sm mt-1">{{ form.description.errors.0 }}</p>
+      {% endif %}
+    </div>
+    <!-- Amount Field -->
+   
       <div class="flex items-center">
         <!-- <span class="px-3 py-2 bg-gray-100 border border-r-0 rounded-l-lg text-gray-600"></span>    -->
         {{ form.amount }}
@@ -27,15 +45,8 @@
         <p class="text-red-600 text-sm mt-1">{{ form.amount.errors.0 }}</p>
       {% endif %}
     </div>
-
-    <!-- Date Field -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
-      {{ form.date }}
-      {% if form.date.errors %}
-        <p class="text-red-600 text-sm mt-1">{{ form.date.errors.0 }}</p>
-      {% endif %}
-    </div>
+ 
+    
 
     <!-- Submit Button -->
     <div class="pt-2">
