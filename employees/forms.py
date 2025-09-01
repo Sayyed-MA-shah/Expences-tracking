@@ -1,5 +1,5 @@
 from django import forms
-from .models import ContractualEmployee, WorkRecord, FixedEmployee, FixedSalaryPayment, FixedWorkCredit
+from .models import ContractualEmployee, WorkRecord, FixedEmployee, FixedSalaryPayment, FixedWorkRecord
 
 class ContractualEmployeeForm(forms.ModelForm):
     class Meta:
@@ -9,13 +9,12 @@ class ContractualEmployeeForm(forms.ModelForm):
 class WorkRecordForm(forms.ModelForm):
     class Meta:
         model = WorkRecord
-        fields = ["date", "quantity", "item_price", "description"]  # ✅ new fields here 
+        fields = ["date", "quantity", "item_price", "description"]  # ✅ new fields here
 
 class FixedEmployeeForm(forms.ModelForm):
     class Meta:
         model = FixedEmployee
         fields = ["name", "phone", "role", "monthly_salary"]
-
 
 class FixedSalaryPaymentForm(forms.ModelForm):
     class Meta:
@@ -45,46 +44,29 @@ class FixedSalaryPaymentForm(forms.ModelForm):
                          "focus:ring-2 focus:ring-green-500 focus:border-green-500"
             }),
         }
-
-class FixedWorkCreditForm(forms.ModelForm):
+class FixedWorkRecordForm(forms.ModelForm):
     class Meta:
-        model = FixedWorkCredit
+        model = FixedWorkRecord
         fields = ["date", "hours", "rate", "amount", "description"]
         labels = {
-            "date": "Work Date",
-            "hours": "Hours (optional)",
-            "rate": "Rate (£/hr, optional)",
-            "amount": "Credit Amount (£)",
+            "hours": "Hours",
+            "rate": "Rate",
+            "amount": "Amount (optional — auto if blank)",
             "description": "Description (optional)",
         }
         widgets = {
-            "date": forms.DateInput(attrs={
-                "type": "date",
-                "class": "w-full border rounded-lg px-3 py-2 focus:outline-none "
-                         "focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            }),
-            "hours": forms.NumberInput(attrs={
-                "step": "0.01", "min": "0",
-                "placeholder": "e.g. 3.5",
-                "class": "w-full border rounded-lg px-3 py-2 focus:outline-none "
-                         "focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            }),
-            "rate": forms.NumberInput(attrs={
-                "step": "0.01", "min": "0",
-                "placeholder": "e.g. 500",
-                "class": "w-full border rounded-lg px-3 py-2 focus:outline-none "
-                         "focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            }),
-            "amount": forms.NumberInput(attrs={
-                "step": "0.01", "min": "0",
-                "placeholder": "Auto-calculated or enter directly",
-                "class": "w-full border rounded-lg px-3 py-2 focus:outline-none "
-                         "focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            }),
-            "description": forms.Textarea(attrs={
-                "rows": 3,
-                "placeholder": "e.g. Overtime on weekend, project delivery, etc.",
-                "class": "w-full border rounded-lg px-3 py-2 focus:outline-none "
-                         "focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            }),
+            "date": forms.DateInput(attrs={"type": "date", "class": "w-full border rounded-lg px-3 py-2"}),
+            "hours": forms.NumberInput(attrs={"step": "0.01", "min": "0", "class": "w-full border rounded-lg px-3 py-2"}),
+            "rate": forms.NumberInput(attrs={"step": "0.01", "min": "0", "class": "w-full border rounded-lg px-3 py-2"}),
+            "amount": forms.NumberInput(attrs={"step": "0.01", "min": "0", "class": "w-full border rounded-lg px-3 py-2"}),
+            "description": forms.Textarea(attrs={"rows": 3, "class": "w-full border rounded-lg px-3 py-2"}),
         }
+
+    def clean(self):
+        cleaned = super().clean()
+        hours = cleaned.get("hours") or 0
+        rate = cleaned.get("rate") or 0
+        amount = cleaned.get("amount") or 0
+        if (not amount or amount == 0) and (hours == 0 or rate == 0):
+            raise forms.ValidationError("Provide either an Amount, or Hours and Rate to calculate it.")
+        return cleaned

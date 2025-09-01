@@ -7,96 +7,139 @@
     <h2 class="text-2xl font-bold text-gray-800">
       {{ employee.name }} – <span class="text-gray-600">Fixed Salary Report</span>
     </h2>
-    <div class="space-x-2">
-      <a href="{% url 'employees:fixed_employee_add_salary' employee.id %}" 
-         class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">
-         + Add Salary
-      </a>
-      <button type="button" onclick="window.print()" class="px-4 py-2 bg-green-600 text-white rounded">🖨 Print</button>
-      <a href="{% url 'employees:fixed_employee_payslip' employee.id %}?start_date={{ start_date }}&end_date={{ end_date }}" 
-         class="px-4 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">
-         🧾 Payslip
-      </a>
-      <a href="{% url 'employees:fixed_employee_add_work' employee.id %}"
-   class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
-  🛠 Log Work
-</a>
+  </div>
 
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+    <div class="bg-white shadow rounded-xl p-6 text-center">
+      <h4 class="text-gray-500 text-sm">Total Salary (Monthly + OT)</h4>
+      <p class="text-2xl font-bold text-green-600 mt-2">PKR {{ total_salary }}</p>
+    </div>
+    <div class="bg-white shadow rounded-xl p-6 text-center">
+      <h4 class="text-gray-500 text-sm">Overtime Total</h4>
+      <p class="text-2xl font-bold text-purple-600 mt-2">PKR {{ overtime_total }}</p>
+    </div>
+    <div class="bg-white shadow rounded-xl p-6 text-center">
+      <h4 class="text-gray-500 text-sm">Salary Paid</h4>
+      <p class="text-2xl font-bold text-blue-600 mt-2">PKR {{ total_paid }}</p>
+    </div>
+    <div class="bg-white shadow rounded-xl p-6 text-center">
+      <h4 class="text-gray-500 text-sm">Balance</h4>
+      <p class="text-2xl font-bold {% if balance < 0 %}text-red-600{% else %}text-green-600{% endif %} mt-2">
+        PKR {{ balance }}
+      </p>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-  <div class="bg-white shadow rounded-xl p-6 text-center">
-    <h4 class="text-gray-500 text-sm">Total Salary</h4>
-    <p class="text-2xl font-bold text-green-600 mt-2">PKR {{ total_salary }}</p>
-  </div>
-  <div class="bg-white shadow rounded-xl p-6 text-center">
-    <h4 class="text-gray-500 text-sm">Salary Paid</h4>
-    <p class="text-2xl font-bold text-blue-600 mt-2">PKR {{ total_paid }}</p>
-  </div>
-  <div class="bg-white shadow rounded-xl p-6 text-center">
-    <h4 class="text-gray-500 text-sm">Balance</h4>
-    <p class="text-2xl font-bold {% if balance < 0 %}text-red-600{% else %}text-green-600{% endif %} mt-2">
-      PKR {{ balance  }}
-    </p>
-  </div>
-</div>
-  <!-- Employee Info -->
-  <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
-    <p><strong>📞 Phone:</strong> {{ employee.phone }}</p>
-    <p><strong>👔 Role:</strong> {{ employee.role }}</p>
-  </div>
-
-  <!-- Date Filter -->
-  <form method="get" class="flex space-x-3 items-center bg-gray-100 p-3 rounded-lg no-print">
+  <!-- Date Filter + Actions -->
+  <form method="get" class="flex flex-wrap gap-3 items-center bg-gray-100 p-3 rounded-lg no-print">
     <label class="flex items-center space-x-1">
-      <span>From:</span>
       <input type="date" name="start_date" value="{{ start_date }}" class="border rounded p-1">
     </label>
     <label class="flex items-center space-x-1">
-      <span>To:</span>
       <input type="date" name="end_date" value="{{ end_date }}" class="border rounded p-1">
     </label>
-    <button type="submit" 
-            class="px-3 py-1 bg-blue-600 text-white rounded shadow hover:bg-blue-700">Filter</button>
+    <button type="submit" class="px-3 py-1 bg-blue-600 text-white rounded shadow hover:bg-blue-700">Filter</button>
     {% if start_date or end_date %}
-    <a href="{% url 'employees:fixed_employee_report' employee.id %}" 
-       class="px-3 py-1 bg-gray-300 text-black rounded hover:bg-gray-400">Clear</a>
+      <a href="{% url 'employees:fixed_employee_report' employee.id %}"
+         class="px-3 py-1 bg-gray-300 text-black rounded hover:bg-gray-400">Clear</a>
     {% endif %}
+
+    <div class="ml-auto flex gap-2">
+      <a href="{% url 'employees:fixed_employee_add_salary' employee.id %}"
+         class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">+ Add Salary</a>
+      <a href="{% url 'employees:fixed_employee_add_work' employee.id %}"
+         class="px-4 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700">+ Add Work</a>
+      <button type="button" onclick="window.print()" class="px-4 py-2 bg-green-600 text-white rounded">🖨 Print</button>
+      <a href="{% url 'employees:fixed_employee_payslip' employee.id %}?start_date={{ start_date }}&end_date={{ end_date }}"
+         class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700">🧾 Payslip</a>
+    </div>
   </form>
 
   <!-- Payments Table -->
   <div class="overflow-x-auto">
+    <h3 class="text-lg font-semibold mb-2">Salary Payments</h3>
     <table class="w-full border-collapse rounded-lg shadow">
       <thead class="bg-gray-200 text-gray-700">
         <tr>
           <th class="p-2 text-left">Date</th>
           <th class="p-2 text-left">Description</th>
           <th class="p-2 text-left">Amount Paid</th>
-          
-          <th class="p-1text-left">Action</th>
+          <th class="p-2 text-left">Action</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y">
         {% for payment in payments %}
-        <tr class="hover:bg-gray-50">
-          <td class="p-2">{{ payment.date }}</td>
-           <td class="p-2">{{ payment.description }}</td>
-          <td class="p-2 font-semibold text-green-700">£{{ payment.amount }}</td>
-        
-        </tr>
+          <tr class="hover:bg-gray-50">
+            <td class="p-2">{{ payment.date }}</td>
+            <td class="p-2">{{ payment.description }}</td>
+            <td class="p-2 font-semibold text-green-700">PKR {{ payment.amount }}</td>
+            <td class="p-2">
+              <form method="post" action="{% url 'employees:fixed_delete_salary_payment' employee.id payment.id %}">
+                {% csrf_token %}
+                <button class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                        onclick="return confirm('Delete this salary payment?');">Delete</button>
+              </form>
+            </td>
+          </tr>
         {% empty %}
-        <tr><td colspan="2" class="p-2 text-center text-gray-500">No payments found.</td></tr>
+          <tr><td colspan="4" class="p-2 text-center text-gray-500">No payments found.</td></tr>
         {% endfor %}
       </tbody>
       <tfoot class="bg-gray-100 font-bold">
         <tr>
-          <td class="p-2 text-right">Total Paid:</td>
-          <td class="p-2">£{{ total_paid }}</td>
+          <td class="p-2 text-right" colspan="2">Total Paid:</td>
+          <td class="p-2">PKR {{ total_paid }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Overtime Work Table -->
+  <div class="overflow-x-auto">
+    <h3 class="text-lg font-semibold mt-8 mb-2">Overtime / Extra Work</h3>
+    <table class="w-full border-collapse rounded-lg shadow">
+      <thead class="bg-gray-200 text-gray-700">
+        <tr>
+          <th class="p-2 text-left">Date</th>
+          <th class="p-2 text-left">Description</th>
+          <th class="p-2 text-left">Hours</th>
+          <th class="p-2 text-left">Rate</th>
+          <th class="p-2 text-left">Amount</th>
+          <th class="p-2 text-left">Action</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y">
+        {% for w in work_records %}
+          <tr class="hover:bg-gray-50">
+            <td class="p-2">{{ w.date }}</td>
+            <td class="p-2">{{ w.description }}</td>
+            <td class="p-2">{{ w.hours }}</td>
+            <td class="p-2">PKR {{ w.rate }}</td>
+            <td class="p-2 font-semibold text-purple-700">PKR {{ w.amount }}</td>
+            <td class="p-2">
+              <form method="post" action="{% url 'employees:fixed_delete_work_record' employee.id w.id %}">
+                {% csrf_token %}
+                <button class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                        onclick="return confirm('Delete this work entry?');">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="p-2 text-center text-gray-500">No overtime work found.</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="bg-gray-100 font-bold">
+        <tr>
+          <td class="p-2 text-right" colspan="4">Overtime Total:</td>
+          <td class="p-2">PKR {{ overtime_total }}</td>
+          <td></td>
         </tr>
         <tr>
-          <td class="p-2 text-right">Balance:</td>
-          <td class="p-2 {% if balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">£{{ balance }}</td>
+          <td class="p-2 text-right" colspan="4">Balance (Salary + OT − Paid):</td>
+          <td class="p-2 {% if balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">PKR {{ balance }}</td>
+          <td></td>
         </tr>
       </tfoot>
     </table>
@@ -105,10 +148,6 @@
 </div>
 
 <style>
-  @media print {
-    .no-print { display: none !important; }
-    nav, footer { display: none !important; }
-    body { background: white !important; }
-  }
+  @media print { .no-print { display: none !important; } nav, footer { display: none !important; } body { background: white !important; } }
 </style>
 {% endblock %}

@@ -8,7 +8,7 @@ from decimal import Decimal
 from django.utils.timezone import now
 from django.urls import reverse
 from datetime import datetime
-from .models import ContractualEmployee, WorkRecord, SalaryPayment, FixedEmployee, FixedSalaryPayment, AdvancePayment, FixedWorkCredit
+from .models import ContractualEmployee, WorkRecord, SalaryPayment, FixedEmployee, FixedSalaryPayment, AdvancePayment,FixedWorkRecord
 from django import forms
 from django.contrib import messages
 from .forms import (
@@ -16,7 +16,7 @@ from .forms import (
     WorkRecordForm,
     FixedEmployeeForm,
     FixedSalaryPaymentForm,
-    FixedWorkCreditForm,
+    FixedWorkRecordForm,
 )
 
 # Show all employees with totals
@@ -345,38 +345,7 @@ def fixed_employee_create(request):
 
 from datetime import datetime
 
-def fixed_employee_report(request, pk):
-    employee = get_object_or_404(FixedEmployee, pk=pk)
 
-    start_date = request.GET.get("start_date")
-    end_date = request.GET.get("end_date")
-
-    payments = FixedSalaryPayment.objects.filter(employee=employee).order_by('-date')
-    
-
-
-    if start_date and end_date:
-        try:
-            start = datetime.strptime(start_date, "%Y-%m-%d").date()
-            end = datetime.strptime(end_date, "%Y-%m-%d").date()
-            payments = payments.filter(date__range=[start, end])
-        
-        except ValueError:
-            pass  # ignore invalid input
-
-    total_paid = sum(p.amount for p in payments)
-    total_salary = employee.monthly_salary
-    balance = total_salary - total_paid
-
-    return render(request, "employees/fixed_employee_report.html", {
-        "employee": employee,
-        "payments": payments,
-        "total_paid": total_paid,
-        "total_salary": total_salary,
-        "balance": balance,
-        "start_date": start_date,
-        "end_date": end_date,
-    })
 
 
 def fixed_employee_add_salary(request, employee_id):
@@ -446,22 +415,78 @@ def fixed_employee_payslip(request, pk):
         "start_date": start_date,
         "end_date": end_date,
     })
-
+# --- Add overtime work for a fixed employee ---
 def fixed_employee_add_work(request, employee_id):
     employee = get_object_or_404(FixedEmployee, id=employee_id)
-
     if request.method == "POST":
-        form = FixedWorkCreditForm(request.POST)
+        form = FixedWorkRecordForm(request.POST)
         if form.is_valid():
-            credit = form.save(commit=False)
-            credit.employee = employee
-            credit.save()
-            messages.success(request, "Work credit added ✅")
+            rec = form.save(commit=False)
+            rec.employee = employee
+            rec.save()
+            messages.success(request, "Work added.")
             return redirect("employees:fixed_employee_report", pk=employee.id)
     else:
-        form = FixedWorkCreditForm()
+        form = FixedWorkRecordForm(initial={"date": timezone.now().date()})
+    return render(request, "employees/fixed_employee_add_work.html", {"form": form, "employee": employee})
 
-    return render(request, "employees/fixed_employee_add_work.html", {
-        "form": form,
+# --- Fixed employee report (now includes overtime + date filters) ---
+def fixed_employee_report(request, pk):
+    employee = get_object_or_404(FixedEmployee, pk=pk)
+
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    payments = FixedSalaryPayment.objects.filter(employee=employee).order_by("-date")
+    work_records = FixedWorkRecord.objects.filter(employee=employee).order_by("-date")
+
+    if start_date and end_date:
+        try:
+            start = datetime.strptime(start_date, "%Y-%m-%d").date()
+            end = datetime.strptime(end_date, "%Y-%m-%d").date()
+            payments = payments.filter(date__range=[start, end])
+            work_records = work_records.filter(date__range=[start, end])
+        except ValueError:
+            pass
+
+    overtime_total = sum((w.amount for w in work_records), Decimal("0"))
+    total_paid = sum((p.amount for p in payments), Decimal("0"))
+
+    # Adjust total salary with overtime
+    total_salary = employee.monthly_salary + overtime_total
+    balance = total_salary - total_paid
+
+    return render(request, "employees/fixed_employee_report.html", {
         "employee": employee,
+        "payments": payments,
+        "work_records": work_records,          # ← NEW
+        "overtime_total": overtime_total,      # ← NEW
+        "total_paid": total_paid,
+        "total_salary": total_salary,          # monthly + overtime
+        "balance": balance,
+        "start_date": start_date,
+        "end_date": end_date,
     })
+
+# --- Delete actions from the fixed report tables (POST only) ---
+def fixed_delete_work_record(request, pk, record_id):
+    employee = get_object_or_404(FixedEmployee, pk=pk)
+    rec = get_object_or_404(FixedWorkRecord, id=record_id)
+    if rec.employee_id != employee.id:
+        messages.error(request, "That work record doesn’t belong to this employee.")
+        return redirect("employees:fixed_employee_report", pk=employee.id)
+    if request.method == "POST":
+        rec.delete()
+        messages.success(request, "Work record deleted.")
+    return redirect("employees:fixed_employee_report", pk=employee.id)
+
+def fixed_delete_salary_payment(request, pk, payment_id):
+    employee = get_object_or_404(FixedEmployee, pk=pk)
+    pay = get_object_or_404(FixedSalaryPayment, id=payment_id)
+    if pay.employee_id != employee.id:
+        messages.error(request, "That salary payment doesn’t belong to this employee.")
+        return redirect("employees:fixed_employee_report", pk=employee.id)
+    if request.method == "POST":
+        pay.delete()
+        messages.success(request, "Salary payment deleted.")
+    return redirect("employees:fixed_employee_report", pk=employee.id)

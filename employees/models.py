@@ -30,15 +30,15 @@ class ContractualEmployee(models.Model):
     def balance_abs(self):
         return abs(self.balance)
 
-    
- 
+
+
 
 
 class WorkRecord(models.Model):
     employee = models.ForeignKey(
         "ContractualEmployee",
         on_delete=models.CASCADE,
-        
+
         related_name="work_records"
     )
     date = models.DateField(default=timezone.now)
@@ -48,7 +48,7 @@ class WorkRecord(models.Model):
     item_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # ✅ safe default
     description = models.TextField(blank=True, null=True)  # ✅ optional
 
-    
+
     def total_price(self):
         return self.quantity * self.item_price
 
@@ -58,12 +58,12 @@ class WorkRecord(models.Model):
     @property
     def total(self):
         return self.quantity * self.item_price
-    
+
 
 class SalaryPayment(models.Model):
     employee = models.ForeignKey(
-        "employees.ContractualEmployee", 
-        on_delete=models.CASCADE, 
+        "employees.ContractualEmployee",
+        on_delete=models.CASCADE,
         related_name="salary_payments"
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -89,7 +89,7 @@ class SalaryPayment(models.Model):
     def __str__(self):
         return f"Salary {self.amount} to {self.employee.name} on {self.date}"
 
-    
+
 # ---------------------- OTHER MODELS ----------------------
 
 
@@ -162,30 +162,26 @@ class FixedSalaryPayment(models.Model):
     def __str__(self):
         return f"{self.employee.name} - {self.amount} on {self.date}"
 
-class FixedWorkCredit(models.Model):
-    """
-    Extra work/overtime credited to a fixed employee.
-    If both hours and rate are provided, amount is auto-computed.
-    Otherwise, you can enter amount directly.
-    """
+
+class FixedWorkRecord(models.Model):
     employee = models.ForeignKey(
-        'FixedEmployee',
+        FixedEmployee,
         on_delete=models.CASCADE,
-        related_name='work_credits'
+        related_name="overtime_records",
     )
     date = models.DateField(default=timezone.now)
-    hours = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    rate  = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    description = models.TextField(blank=True, default="")
+    hours = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    rate = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # computed if 0
+    description = models.TextField(blank=True, null=True)
 
-    class Meta:
-        ordering = ['-date', '-id']
+    def save(self, *args, **kwargs):
+        # If amount not provided, compute it from hours * rate
+        if not self.amount or self.amount == 0:
+            h = self.hours or Decimal("0")
+            r = self.rate or Decimal("0")
+            self.amount = h * r
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.employee} • {self.date} • +{self.amount}"
-
-    def clean(self):
-        # Compute amount if not set but hours & rate exist
-        if (self.amount is None or self.amount == 0) and self.hours and self.rate:
-            self.amount = (self.hours * self.rate).quantize(Decimal('0.01'))
+        return f"{self.employee.name} – OT {self.amount} on {self.date}"
